@@ -39,16 +39,17 @@ func NewTrustedIDProvidersClient(p pipeline.Pipeline) TrustedIDProvidersClient {
 // CreateOrUpdate creates or updates the specified trusted identity provider. During update, the trusted identity
 // provider with the specified name will be replaced with this new provider
 //
+// resourceGroupName is the name of the Azure resource group. accountName is the name of the Data Lake Store account.
 // trustedIDProviderName is the name of the trusted identity provider. This is used for differentiation of providers in
 // the account. parameters is parameters supplied to create or replace the trusted identity provider.
-func (client TrustedIDProvidersClient) CreateOrUpdate(ctx context.Context, trustedIDProviderName string, parameters CreateOrUpdateTrustedIDProviderParameters) (*TrustedIDProvider, error) {
+func (client TrustedIDProvidersClient) CreateOrUpdate(ctx context.Context, resourceGroupName string, accountName string, trustedIDProviderName string, parameters CreateOrUpdateTrustedIDProviderParameters) (*TrustedIDProvider, error) {
 	if err := validate([]validation{
 		{targetValue: parameters,
 			constraints: []constraint{{target: "parameters.CreateOrUpdateTrustedIDProviderProperties", name: null, rule: true,
 				chain: []constraint{{target: "parameters.CreateOrUpdateTrustedIDProviderProperties.IDProvider", name: null, rule: true, chain: nil}}}}}}); err != nil {
 		return nil, err
 	}
-	req, err := client.createOrUpdatePreparer(trustedIDProviderName, parameters)
+	req, err := client.createOrUpdatePreparer(resourceGroupName, accountName, trustedIDProviderName, parameters)
 	if err != nil {
 		return nil, err
 	}
@@ -60,7 +61,7 @@ func (client TrustedIDProvidersClient) CreateOrUpdate(ctx context.Context, trust
 }
 
 // createOrUpdatePreparer prepares the CreateOrUpdate request.
-func (client TrustedIDProvidersClient) createOrUpdatePreparer(trustedIDProviderName string, parameters CreateOrUpdateTrustedIDProviderParameters) (pipeline.Request, error) {
+func (client TrustedIDProvidersClient) createOrUpdatePreparer(resourceGroupName string, accountName string, trustedIDProviderName string, parameters CreateOrUpdateTrustedIDProviderParameters) (pipeline.Request, error) {
 	u := client.url
 	u.Path = "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DataLakeStore/accounts/{accountName}/trustedIdProviders/{trustedIdProviderName}"
 	req, err := pipeline.NewRequest("PUT", u, nil)
@@ -108,9 +109,10 @@ func (client TrustedIDProvidersClient) createOrUpdateResponder(resp pipeline.Res
 
 // Delete deletes the specified trusted identity provider from the specified Data Lake Store account
 //
+// resourceGroupName is the name of the Azure resource group. accountName is the name of the Data Lake Store account.
 // trustedIDProviderName is the name of the trusted identity provider to delete.
-func (client TrustedIDProvidersClient) Delete(ctx context.Context, trustedIDProviderName string) (*http.Response, error) {
-	req, err := client.deletePreparer(trustedIDProviderName)
+func (client TrustedIDProvidersClient) Delete(ctx context.Context, resourceGroupName string, accountName string, trustedIDProviderName string) (*http.Response, error) {
+	req, err := client.deletePreparer(resourceGroupName, accountName, trustedIDProviderName)
 	if err != nil {
 		return nil, err
 	}
@@ -122,7 +124,7 @@ func (client TrustedIDProvidersClient) Delete(ctx context.Context, trustedIDProv
 }
 
 // deletePreparer prepares the Delete request.
-func (client TrustedIDProvidersClient) deletePreparer(trustedIDProviderName string) (pipeline.Request, error) {
+func (client TrustedIDProvidersClient) deletePreparer(resourceGroupName string, accountName string, trustedIDProviderName string) (pipeline.Request, error) {
 	u := client.url
 	u.Path = "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DataLakeStore/accounts/{accountName}/trustedIdProviders/{trustedIdProviderName}"
 	req, err := pipeline.NewRequest("DELETE", u, nil)
@@ -146,9 +148,10 @@ func (client TrustedIDProvidersClient) deleteResponder(resp pipeline.Response) (
 
 // Get gets the specified Data Lake Store trusted identity provider.
 //
+// resourceGroupName is the name of the Azure resource group. accountName is the name of the Data Lake Store account.
 // trustedIDProviderName is the name of the trusted identity provider to retrieve.
-func (client TrustedIDProvidersClient) Get(ctx context.Context, trustedIDProviderName string) (*TrustedIDProvider, error) {
-	req, err := client.getPreparer(trustedIDProviderName)
+func (client TrustedIDProvidersClient) Get(ctx context.Context, resourceGroupName string, accountName string, trustedIDProviderName string) (*TrustedIDProvider, error) {
+	req, err := client.getPreparer(resourceGroupName, accountName, trustedIDProviderName)
 	if err != nil {
 		return nil, err
 	}
@@ -160,7 +163,7 @@ func (client TrustedIDProvidersClient) Get(ctx context.Context, trustedIDProvide
 }
 
 // getPreparer prepares the Get request.
-func (client TrustedIDProvidersClient) getPreparer(trustedIDProviderName string) (pipeline.Request, error) {
+func (client TrustedIDProvidersClient) getPreparer(resourceGroupName string, accountName string, trustedIDProviderName string) (pipeline.Request, error) {
 	u := client.url
 	u.Path = "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DataLakeStore/accounts/{accountName}/trustedIdProviders/{trustedIdProviderName}"
 	req, err := pipeline.NewRequest("GET", u, nil)
@@ -198,8 +201,10 @@ func (client TrustedIDProvidersClient) getResponder(resp pipeline.Response) (pip
 }
 
 // ListByAccount lists the Data Lake Store trusted identity providers within the specified Data Lake Store account.
-func (client TrustedIDProvidersClient) ListByAccount(ctx context.Context) (*TrustedIDProviderListResult, error) {
-	req, err := client.listByAccountPreparer()
+//
+// resourceGroupName is the name of the Azure resource group. accountName is the name of the Data Lake Store account.
+func (client TrustedIDProvidersClient) ListByAccount(ctx context.Context, resourceGroupName string, accountName string) (*TrustedIDProviderListResult, error) {
+	req, err := client.listByAccountPreparer(resourceGroupName, accountName)
 	if err != nil {
 		return nil, err
 	}
@@ -211,7 +216,7 @@ func (client TrustedIDProvidersClient) ListByAccount(ctx context.Context) (*Trus
 }
 
 // listByAccountPreparer prepares the ListByAccount request.
-func (client TrustedIDProvidersClient) listByAccountPreparer() (pipeline.Request, error) {
+func (client TrustedIDProvidersClient) listByAccountPreparer(resourceGroupName string, accountName string) (pipeline.Request, error) {
 	u := client.url
 	u.Path = "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DataLakeStore/accounts/{accountName}/trustedIdProviders"
 	req, err := pipeline.NewRequest("GET", u, nil)
@@ -250,10 +255,11 @@ func (client TrustedIDProvidersClient) listByAccountResponder(resp pipeline.Resp
 
 // Update updates the specified trusted identity provider.
 //
+// resourceGroupName is the name of the Azure resource group. accountName is the name of the Data Lake Store account.
 // trustedIDProviderName is the name of the trusted identity provider. This is used for differentiation of providers in
 // the account. parameters is parameters supplied to update the trusted identity provider.
-func (client TrustedIDProvidersClient) Update(ctx context.Context, trustedIDProviderName string, parameters *UpdateTrustedIDProviderParameters) (*TrustedIDProvider, error) {
-	req, err := client.updatePreparer(trustedIDProviderName, parameters)
+func (client TrustedIDProvidersClient) Update(ctx context.Context, resourceGroupName string, accountName string, trustedIDProviderName string, parameters *UpdateTrustedIDProviderParameters) (*TrustedIDProvider, error) {
+	req, err := client.updatePreparer(resourceGroupName, accountName, trustedIDProviderName, parameters)
 	if err != nil {
 		return nil, err
 	}
@@ -265,7 +271,7 @@ func (client TrustedIDProvidersClient) Update(ctx context.Context, trustedIDProv
 }
 
 // updatePreparer prepares the Update request.
-func (client TrustedIDProvidersClient) updatePreparer(trustedIDProviderName string, parameters *UpdateTrustedIDProviderParameters) (pipeline.Request, error) {
+func (client TrustedIDProvidersClient) updatePreparer(resourceGroupName string, accountName string, trustedIDProviderName string, parameters *UpdateTrustedIDProviderParameters) (pipeline.Request, error) {
 	u := client.url
 	u.Path = "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DataLakeStore/accounts/{accountName}/trustedIdProviders/{trustedIdProviderName}"
 	req, err := pipeline.NewRequest("PATCH", u, nil)

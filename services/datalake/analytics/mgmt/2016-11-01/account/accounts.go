@@ -110,8 +110,9 @@ func (client AccountsClient) checkNameAvailabilityResponder(resp pipeline.Respon
 // Lake Analytics workloads. This method may poll for completion. Polling can be canceled by passing the cancel channel
 // argument. The channel will be used to cancel polling and any outstanding HTTP requests.
 //
-// parameters is parameters supplied to create a new Data Lake Analytics account.
-func (client AccountsClient) Create(ctx context.Context, parameters CreateDataLakeAnalyticsAccountParameters) (*DataLakeAnalyticsAccount, error) {
+// resourceGroupName is the name of the Azure resource group. accountName is the name of the Data Lake Analytics
+// account. parameters is parameters supplied to create a new Data Lake Analytics account.
+func (client AccountsClient) Create(ctx context.Context, resourceGroupName string, accountName string, parameters CreateDataLakeAnalyticsAccountParameters) (*DataLakeAnalyticsAccount, error) {
 	if err := validate([]validation{
 		{targetValue: parameters,
 			constraints: []constraint{{target: "parameters.Location", name: null, rule: true, chain: nil},
@@ -133,7 +134,7 @@ func (client AccountsClient) Create(ctx context.Context, parameters CreateDataLa
 					}}}}}); err != nil {
 		return nil, err
 	}
-	req, err := client.createPreparer(parameters)
+	req, err := client.createPreparer(resourceGroupName, accountName, parameters)
 	if err != nil {
 		return nil, err
 	}
@@ -145,7 +146,7 @@ func (client AccountsClient) Create(ctx context.Context, parameters CreateDataLa
 }
 
 // createPreparer prepares the Create request.
-func (client AccountsClient) createPreparer(parameters CreateDataLakeAnalyticsAccountParameters) (pipeline.Request, error) {
+func (client AccountsClient) createPreparer(resourceGroupName string, accountName string, parameters CreateDataLakeAnalyticsAccountParameters) (pipeline.Request, error) {
 	u := client.url
 	u.Path = "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DataLakeAnalytics/accounts/{accountName}"
 	req, err := pipeline.NewRequest("PUT", u, nil)
@@ -194,8 +195,11 @@ func (client AccountsClient) createResponder(resp pipeline.Response) (pipeline.R
 // Delete begins the delete process for the Data Lake Analytics account object specified by the account name. This
 // method may poll for completion. Polling can be canceled by passing the cancel channel argument. The channel will be
 // used to cancel polling and any outstanding HTTP requests.
-func (client AccountsClient) Delete(ctx context.Context) (*http.Response, error) {
-	req, err := client.deletePreparer()
+//
+// resourceGroupName is the name of the Azure resource group. accountName is the name of the Data Lake Analytics
+// account.
+func (client AccountsClient) Delete(ctx context.Context, resourceGroupName string, accountName string) (*http.Response, error) {
+	req, err := client.deletePreparer(resourceGroupName, accountName)
 	if err != nil {
 		return nil, err
 	}
@@ -207,7 +211,7 @@ func (client AccountsClient) Delete(ctx context.Context) (*http.Response, error)
 }
 
 // deletePreparer prepares the Delete request.
-func (client AccountsClient) deletePreparer() (pipeline.Request, error) {
+func (client AccountsClient) deletePreparer(resourceGroupName string, accountName string) (pipeline.Request, error) {
 	u := client.url
 	u.Path = "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DataLakeAnalytics/accounts/{accountName}"
 	req, err := pipeline.NewRequest("DELETE", u, nil)
@@ -230,8 +234,11 @@ func (client AccountsClient) deleteResponder(resp pipeline.Response) (pipeline.R
 }
 
 // Get gets details of the specified Data Lake Analytics account.
-func (client AccountsClient) Get(ctx context.Context) (*DataLakeAnalyticsAccount, error) {
-	req, err := client.getPreparer()
+//
+// resourceGroupName is the name of the Azure resource group. accountName is the name of the Data Lake Analytics
+// account.
+func (client AccountsClient) Get(ctx context.Context, resourceGroupName string, accountName string) (*DataLakeAnalyticsAccount, error) {
+	req, err := client.getPreparer(resourceGroupName, accountName)
 	if err != nil {
 		return nil, err
 	}
@@ -243,7 +250,7 @@ func (client AccountsClient) Get(ctx context.Context) (*DataLakeAnalyticsAccount
 }
 
 // getPreparer prepares the Get request.
-func (client AccountsClient) getPreparer() (pipeline.Request, error) {
+func (client AccountsClient) getPreparer(resourceGroupName string, accountName string) (pipeline.Request, error) {
 	u := client.url
 	u.Path = "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DataLakeAnalytics/accounts/{accountName}"
 	req, err := pipeline.NewRequest("GET", u, nil)
@@ -370,14 +377,14 @@ func (client AccountsClient) listResponder(resp pipeline.Response) (pipeline.Res
 // ListByResourceGroup gets the first page of Data Lake Analytics accounts, if any, within a specific resource group.
 // This includes a link to the next page, if any.
 //
-// filter is oData filter. Optional. top is the number of items to return. Optional. skip is the number of items to
-// skip over before returning elements. Optional. selectParameter is oData Select statement. Limits the properties on
-// each entry to just those requested, e.g. Categories?$select=CategoryName,Description. Optional. orderby is orderBy
-// clause. One or more comma-separated expressions with an optional "asc" (the default) or "desc" depending on the
-// order you'd like the values sorted, e.g. Categories?$orderby=CategoryName desc. Optional. count is the Boolean value
-// of true or false to request a count of the matching resources included with the resources in the response, e.g.
-// Categories?$count=true. Optional.
-func (client AccountsClient) ListByResourceGroup(ctx context.Context, filter *string, top *int32, skip *int32, selectParameter *string, orderby *string, count *bool) (*DataLakeAnalyticsAccountListResult, error) {
+// resourceGroupName is the name of the Azure resource group. filter is oData filter. Optional. top is the number of
+// items to return. Optional. skip is the number of items to skip over before returning elements. Optional.
+// selectParameter is oData Select statement. Limits the properties on each entry to just those requested, e.g.
+// Categories?$select=CategoryName,Description. Optional. orderby is orderBy clause. One or more comma-separated
+// expressions with an optional "asc" (the default) or "desc" depending on the order you'd like the values sorted, e.g.
+// Categories?$orderby=CategoryName desc. Optional. count is the Boolean value of true or false to request a count of
+// the matching resources included with the resources in the response, e.g. Categories?$count=true. Optional.
+func (client AccountsClient) ListByResourceGroup(ctx context.Context, resourceGroupName string, filter *string, top *int32, skip *int32, selectParameter *string, orderby *string, count *bool) (*DataLakeAnalyticsAccountListResult, error) {
 	if err := validate([]validation{
 		{targetValue: top,
 			constraints: []constraint{{target: "top", name: null, rule: false,
@@ -387,7 +394,7 @@ func (client AccountsClient) ListByResourceGroup(ctx context.Context, filter *st
 				chain: []constraint{{target: "skip", name: inclusiveMinimum, rule: 1, chain: nil}}}}}}); err != nil {
 		return nil, err
 	}
-	req, err := client.listByResourceGroupPreparer(filter, top, skip, selectParameter, orderby, count)
+	req, err := client.listByResourceGroupPreparer(resourceGroupName, filter, top, skip, selectParameter, orderby, count)
 	if err != nil {
 		return nil, err
 	}
@@ -399,7 +406,7 @@ func (client AccountsClient) ListByResourceGroup(ctx context.Context, filter *st
 }
 
 // listByResourceGroupPreparer prepares the ListByResourceGroup request.
-func (client AccountsClient) listByResourceGroupPreparer(filter *string, top *int32, skip *int32, selectParameter *string, orderby *string, count *bool) (pipeline.Request, error) {
+func (client AccountsClient) listByResourceGroupPreparer(resourceGroupName string, filter *string, top *int32, skip *int32, selectParameter *string, orderby *string, count *bool) (pipeline.Request, error) {
 	u := client.url
 	u.Path = "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DataLakeAnalytics/accounts"
 	req, err := pipeline.NewRequest("GET", u, nil)
@@ -458,9 +465,10 @@ func (client AccountsClient) listByResourceGroupResponder(resp pipeline.Response
 // object. This method may poll for completion. Polling can be canceled by passing the cancel channel argument. The
 // channel will be used to cancel polling and any outstanding HTTP requests.
 //
-// parameters is parameters supplied to the update Data Lake Analytics account operation.
-func (client AccountsClient) Update(ctx context.Context, parameters *UpdateDataLakeAnalyticsAccountParameters) (*DataLakeAnalyticsAccount, error) {
-	req, err := client.updatePreparer(parameters)
+// resourceGroupName is the name of the Azure resource group. accountName is the name of the Data Lake Analytics
+// account. parameters is parameters supplied to the update Data Lake Analytics account operation.
+func (client AccountsClient) Update(ctx context.Context, resourceGroupName string, accountName string, parameters *UpdateDataLakeAnalyticsAccountParameters) (*DataLakeAnalyticsAccount, error) {
+	req, err := client.updatePreparer(resourceGroupName, accountName, parameters)
 	if err != nil {
 		return nil, err
 	}
@@ -472,7 +480,7 @@ func (client AccountsClient) Update(ctx context.Context, parameters *UpdateDataL
 }
 
 // updatePreparer prepares the Update request.
-func (client AccountsClient) updatePreparer(parameters *UpdateDataLakeAnalyticsAccountParameters) (pipeline.Request, error) {
+func (client AccountsClient) updatePreparer(resourceGroupName string, accountName string, parameters *UpdateDataLakeAnalyticsAccountParameters) (pipeline.Request, error) {
 	u := client.url
 	u.Path = "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DataLakeAnalytics/accounts/{accountName}"
 	req, err := pipeline.NewRequest("PATCH", u, nil)

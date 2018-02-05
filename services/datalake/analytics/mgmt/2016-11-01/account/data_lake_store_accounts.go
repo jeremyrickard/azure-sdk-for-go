@@ -39,10 +39,11 @@ func NewDataLakeStoreAccountsClient(p pipeline.Pipeline) DataLakeStoreAccountsCl
 
 // Add updates the specified Data Lake Analytics account to include the additional Data Lake Store account.
 //
-// dataLakeStoreAccountName is the name of the Data Lake Store account to add. parameters is the details of the Data
-// Lake Store account.
-func (client DataLakeStoreAccountsClient) Add(ctx context.Context, dataLakeStoreAccountName string, parameters *AddDataLakeStoreParameters) (*http.Response, error) {
-	req, err := client.addPreparer(dataLakeStoreAccountName, parameters)
+// resourceGroupName is the name of the Azure resource group. accountName is the name of the Data Lake Analytics
+// account. dataLakeStoreAccountName is the name of the Data Lake Store account to add. parameters is the details of
+// the Data Lake Store account.
+func (client DataLakeStoreAccountsClient) Add(ctx context.Context, resourceGroupName string, accountName string, dataLakeStoreAccountName string, parameters *AddDataLakeStoreParameters) (*http.Response, error) {
+	req, err := client.addPreparer(resourceGroupName, accountName, dataLakeStoreAccountName, parameters)
 	if err != nil {
 		return nil, err
 	}
@@ -54,7 +55,7 @@ func (client DataLakeStoreAccountsClient) Add(ctx context.Context, dataLakeStore
 }
 
 // addPreparer prepares the Add request.
-func (client DataLakeStoreAccountsClient) addPreparer(dataLakeStoreAccountName string, parameters *AddDataLakeStoreParameters) (pipeline.Request, error) {
+func (client DataLakeStoreAccountsClient) addPreparer(resourceGroupName string, accountName string, dataLakeStoreAccountName string, parameters *AddDataLakeStoreParameters) (pipeline.Request, error) {
 	u := client.url
 	u.Path = "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DataLakeAnalytics/accounts/{accountName}/dataLakeStoreAccounts/{dataLakeStoreAccountName}"
 	req, err := pipeline.NewRequest("PUT", u, nil)
@@ -87,9 +88,10 @@ func (client DataLakeStoreAccountsClient) addResponder(resp pipeline.Response) (
 
 // Delete updates the Data Lake Analytics account specified to remove the specified Data Lake Store account.
 //
-// dataLakeStoreAccountName is the name of the Data Lake Store account to remove
-func (client DataLakeStoreAccountsClient) Delete(ctx context.Context, dataLakeStoreAccountName string) (*http.Response, error) {
-	req, err := client.deletePreparer(dataLakeStoreAccountName)
+// resourceGroupName is the name of the Azure resource group. accountName is the name of the Data Lake Analytics
+// account. dataLakeStoreAccountName is the name of the Data Lake Store account to remove
+func (client DataLakeStoreAccountsClient) Delete(ctx context.Context, resourceGroupName string, accountName string, dataLakeStoreAccountName string) (*http.Response, error) {
+	req, err := client.deletePreparer(resourceGroupName, accountName, dataLakeStoreAccountName)
 	if err != nil {
 		return nil, err
 	}
@@ -101,7 +103,7 @@ func (client DataLakeStoreAccountsClient) Delete(ctx context.Context, dataLakeSt
 }
 
 // deletePreparer prepares the Delete request.
-func (client DataLakeStoreAccountsClient) deletePreparer(dataLakeStoreAccountName string) (pipeline.Request, error) {
+func (client DataLakeStoreAccountsClient) deletePreparer(resourceGroupName string, accountName string, dataLakeStoreAccountName string) (pipeline.Request, error) {
 	u := client.url
 	u.Path = "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DataLakeAnalytics/accounts/{accountName}/dataLakeStoreAccounts/{dataLakeStoreAccountName}"
 	req, err := pipeline.NewRequest("DELETE", u, nil)
@@ -125,9 +127,10 @@ func (client DataLakeStoreAccountsClient) deleteResponder(resp pipeline.Response
 
 // Get gets the specified Data Lake Store account details in the specified Data Lake Analytics account.
 //
-// dataLakeStoreAccountName is the name of the Data Lake Store account to retrieve
-func (client DataLakeStoreAccountsClient) Get(ctx context.Context, dataLakeStoreAccountName string) (*DataLakeStoreAccountInformation, error) {
-	req, err := client.getPreparer(dataLakeStoreAccountName)
+// resourceGroupName is the name of the Azure resource group. accountName is the name of the Data Lake Analytics
+// account. dataLakeStoreAccountName is the name of the Data Lake Store account to retrieve
+func (client DataLakeStoreAccountsClient) Get(ctx context.Context, resourceGroupName string, accountName string, dataLakeStoreAccountName string) (*DataLakeStoreAccountInformation, error) {
+	req, err := client.getPreparer(resourceGroupName, accountName, dataLakeStoreAccountName)
 	if err != nil {
 		return nil, err
 	}
@@ -139,7 +142,7 @@ func (client DataLakeStoreAccountsClient) Get(ctx context.Context, dataLakeStore
 }
 
 // getPreparer prepares the Get request.
-func (client DataLakeStoreAccountsClient) getPreparer(dataLakeStoreAccountName string) (pipeline.Request, error) {
+func (client DataLakeStoreAccountsClient) getPreparer(resourceGroupName string, accountName string, dataLakeStoreAccountName string) (pipeline.Request, error) {
 	u := client.url
 	u.Path = "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DataLakeAnalytics/accounts/{accountName}/dataLakeStoreAccounts/{dataLakeStoreAccountName}"
 	req, err := pipeline.NewRequest("GET", u, nil)
@@ -179,14 +182,15 @@ func (client DataLakeStoreAccountsClient) getResponder(resp pipeline.Response) (
 // ListByAccount gets the first page of Data Lake Store accounts linked to the specified Data Lake Analytics account.
 // The response includes a link to the next page, if any.
 //
-// filter is oData filter. Optional. top is the number of items to return. Optional. skip is the number of items to
-// skip over before returning elements. Optional. selectParameter is oData Select statement. Limits the properties on
-// each entry to just those requested, e.g. Categories?$select=CategoryName,Description. Optional. orderby is orderBy
-// clause. One or more comma-separated expressions with an optional "asc" (the default) or "desc" depending on the
-// order you'd like the values sorted, e.g. Categories?$orderby=CategoryName desc. Optional. count is the Boolean value
-// of true or false to request a count of the matching resources included with the resources in the response, e.g.
-// Categories?$count=true. Optional.
-func (client DataLakeStoreAccountsClient) ListByAccount(ctx context.Context, filter *string, top *int32, skip *int32, selectParameter *string, orderby *string, count *bool) (*DataLakeStoreAccountInformationListResult, error) {
+// resourceGroupName is the name of the Azure resource group. accountName is the name of the Data Lake Analytics
+// account. filter is oData filter. Optional. top is the number of items to return. Optional. skip is the number of
+// items to skip over before returning elements. Optional. selectParameter is oData Select statement. Limits the
+// properties on each entry to just those requested, e.g. Categories?$select=CategoryName,Description. Optional.
+// orderby is orderBy clause. One or more comma-separated expressions with an optional "asc" (the default) or "desc"
+// depending on the order you'd like the values sorted, e.g. Categories?$orderby=CategoryName desc. Optional. count is
+// the Boolean value of true or false to request a count of the matching resources included with the resources in the
+// response, e.g. Categories?$count=true. Optional.
+func (client DataLakeStoreAccountsClient) ListByAccount(ctx context.Context, resourceGroupName string, accountName string, filter *string, top *int32, skip *int32, selectParameter *string, orderby *string, count *bool) (*DataLakeStoreAccountInformationListResult, error) {
 	if err := validate([]validation{
 		{targetValue: top,
 			constraints: []constraint{{target: "top", name: null, rule: false,
@@ -196,7 +200,7 @@ func (client DataLakeStoreAccountsClient) ListByAccount(ctx context.Context, fil
 				chain: []constraint{{target: "skip", name: inclusiveMinimum, rule: 1, chain: nil}}}}}}); err != nil {
 		return nil, err
 	}
-	req, err := client.listByAccountPreparer(filter, top, skip, selectParameter, orderby, count)
+	req, err := client.listByAccountPreparer(resourceGroupName, accountName, filter, top, skip, selectParameter, orderby, count)
 	if err != nil {
 		return nil, err
 	}
@@ -208,7 +212,7 @@ func (client DataLakeStoreAccountsClient) ListByAccount(ctx context.Context, fil
 }
 
 // listByAccountPreparer prepares the ListByAccount request.
-func (client DataLakeStoreAccountsClient) listByAccountPreparer(filter *string, top *int32, skip *int32, selectParameter *string, orderby *string, count *bool) (pipeline.Request, error) {
+func (client DataLakeStoreAccountsClient) listByAccountPreparer(resourceGroupName string, accountName string, filter *string, top *int32, skip *int32, selectParameter *string, orderby *string, count *bool) (pipeline.Request, error) {
 	u := client.url
 	u.Path = "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DataLakeAnalytics/accounts/{accountName}/dataLakeStoreAccounts"
 	req, err := pipeline.NewRequest("GET", u, nil)

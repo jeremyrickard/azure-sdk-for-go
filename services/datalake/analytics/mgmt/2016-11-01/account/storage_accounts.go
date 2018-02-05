@@ -39,16 +39,17 @@ func NewStorageAccountsClient(p pipeline.Pipeline) StorageAccountsClient {
 
 // Add updates the specified Data Lake Analytics account to add an Azure Storage account.
 //
-// storageAccountName is the name of the Azure Storage account to add parameters is the parameters containing the
-// access key and optional suffix for the Azure Storage Account.
-func (client StorageAccountsClient) Add(ctx context.Context, storageAccountName string, parameters AddStorageAccountParameters) (*http.Response, error) {
+// resourceGroupName is the name of the Azure resource group. accountName is the name of the Data Lake Analytics
+// account. storageAccountName is the name of the Azure Storage account to add parameters is the parameters containing
+// the access key and optional suffix for the Azure Storage Account.
+func (client StorageAccountsClient) Add(ctx context.Context, resourceGroupName string, accountName string, storageAccountName string, parameters AddStorageAccountParameters) (*http.Response, error) {
 	if err := validate([]validation{
 		{targetValue: parameters,
 			constraints: []constraint{{target: "parameters.AddStorageAccountProperties", name: null, rule: true,
 				chain: []constraint{{target: "parameters.AddStorageAccountProperties.AccessKey", name: null, rule: true, chain: nil}}}}}}); err != nil {
 		return nil, err
 	}
-	req, err := client.addPreparer(storageAccountName, parameters)
+	req, err := client.addPreparer(resourceGroupName, accountName, storageAccountName, parameters)
 	if err != nil {
 		return nil, err
 	}
@@ -60,7 +61,7 @@ func (client StorageAccountsClient) Add(ctx context.Context, storageAccountName 
 }
 
 // addPreparer prepares the Add request.
-func (client StorageAccountsClient) addPreparer(storageAccountName string, parameters AddStorageAccountParameters) (pipeline.Request, error) {
+func (client StorageAccountsClient) addPreparer(resourceGroupName string, accountName string, storageAccountName string, parameters AddStorageAccountParameters) (pipeline.Request, error) {
 	u := client.url
 	u.Path = "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DataLakeAnalytics/accounts/{accountName}/storageAccounts/{storageAccountName}"
 	req, err := pipeline.NewRequest("PUT", u, nil)
@@ -93,9 +94,10 @@ func (client StorageAccountsClient) addResponder(resp pipeline.Response) (pipeli
 
 // Delete updates the specified Data Lake Analytics account to remove an Azure Storage account.
 //
-// storageAccountName is the name of the Azure Storage account to remove
-func (client StorageAccountsClient) Delete(ctx context.Context, storageAccountName string) (*http.Response, error) {
-	req, err := client.deletePreparer(storageAccountName)
+// resourceGroupName is the name of the Azure resource group. accountName is the name of the Data Lake Analytics
+// account. storageAccountName is the name of the Azure Storage account to remove
+func (client StorageAccountsClient) Delete(ctx context.Context, resourceGroupName string, accountName string, storageAccountName string) (*http.Response, error) {
+	req, err := client.deletePreparer(resourceGroupName, accountName, storageAccountName)
 	if err != nil {
 		return nil, err
 	}
@@ -107,7 +109,7 @@ func (client StorageAccountsClient) Delete(ctx context.Context, storageAccountNa
 }
 
 // deletePreparer prepares the Delete request.
-func (client StorageAccountsClient) deletePreparer(storageAccountName string) (pipeline.Request, error) {
+func (client StorageAccountsClient) deletePreparer(resourceGroupName string, accountName string, storageAccountName string) (pipeline.Request, error) {
 	u := client.url
 	u.Path = "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DataLakeAnalytics/accounts/{accountName}/storageAccounts/{storageAccountName}"
 	req, err := pipeline.NewRequest("DELETE", u, nil)
@@ -131,9 +133,10 @@ func (client StorageAccountsClient) deleteResponder(resp pipeline.Response) (pip
 
 // Get gets the specified Azure Storage account linked to the given Data Lake Analytics account.
 //
-// storageAccountName is the name of the Azure Storage account for which to retrieve the details.
-func (client StorageAccountsClient) Get(ctx context.Context, storageAccountName string) (*StorageAccountInformation, error) {
-	req, err := client.getPreparer(storageAccountName)
+// resourceGroupName is the name of the Azure resource group. accountName is the name of the Data Lake Analytics
+// account. storageAccountName is the name of the Azure Storage account for which to retrieve the details.
+func (client StorageAccountsClient) Get(ctx context.Context, resourceGroupName string, accountName string, storageAccountName string) (*StorageAccountInformation, error) {
+	req, err := client.getPreparer(resourceGroupName, accountName, storageAccountName)
 	if err != nil {
 		return nil, err
 	}
@@ -145,7 +148,7 @@ func (client StorageAccountsClient) Get(ctx context.Context, storageAccountName 
 }
 
 // getPreparer prepares the Get request.
-func (client StorageAccountsClient) getPreparer(storageAccountName string) (pipeline.Request, error) {
+func (client StorageAccountsClient) getPreparer(resourceGroupName string, accountName string, storageAccountName string) (pipeline.Request, error) {
 	u := client.url
 	u.Path = "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DataLakeAnalytics/accounts/{accountName}/storageAccounts/{storageAccountName}"
 	req, err := pipeline.NewRequest("GET", u, nil)
@@ -185,10 +188,11 @@ func (client StorageAccountsClient) getResponder(resp pipeline.Response) (pipeli
 // GetStorageContainer gets the specified Azure Storage container associated with the given Data Lake Analytics and
 // Azure Storage accounts.
 //
-// storageAccountName is the name of the Azure storage account from which to retrieve the blob container. containerName
-// is the name of the Azure storage container to retrieve
-func (client StorageAccountsClient) GetStorageContainer(ctx context.Context, storageAccountName string, containerName string) (*StorageContainer, error) {
-	req, err := client.getStorageContainerPreparer(storageAccountName, containerName)
+// resourceGroupName is the name of the Azure resource group. accountName is the name of the Data Lake Analytics
+// account. storageAccountName is the name of the Azure storage account from which to retrieve the blob container.
+// containerName is the name of the Azure storage container to retrieve
+func (client StorageAccountsClient) GetStorageContainer(ctx context.Context, resourceGroupName string, accountName string, storageAccountName string, containerName string) (*StorageContainer, error) {
+	req, err := client.getStorageContainerPreparer(resourceGroupName, accountName, storageAccountName, containerName)
 	if err != nil {
 		return nil, err
 	}
@@ -200,7 +204,7 @@ func (client StorageAccountsClient) GetStorageContainer(ctx context.Context, sto
 }
 
 // getStorageContainerPreparer prepares the GetStorageContainer request.
-func (client StorageAccountsClient) getStorageContainerPreparer(storageAccountName string, containerName string) (pipeline.Request, error) {
+func (client StorageAccountsClient) getStorageContainerPreparer(resourceGroupName string, accountName string, storageAccountName string, containerName string) (pipeline.Request, error) {
 	u := client.url
 	u.Path = "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DataLakeAnalytics/accounts/{accountName}/storageAccounts/{storageAccountName}/containers/{containerName}"
 	req, err := pipeline.NewRequest("GET", u, nil)
@@ -240,14 +244,15 @@ func (client StorageAccountsClient) getStorageContainerResponder(resp pipeline.R
 // ListByAccount gets the first page of Azure Storage accounts, if any, linked to the specified Data Lake Analytics
 // account. The response includes a link to the next page, if any.
 //
-// filter is the OData filter. Optional. top is the number of items to return. Optional. skip is the number of items to
-// skip over before returning elements. Optional. selectParameter is oData Select statement. Limits the properties on
-// each entry to just those requested, e.g. Categories?$select=CategoryName,Description. Optional. orderby is orderBy
-// clause. One or more comma-separated expressions with an optional "asc" (the default) or "desc" depending on the
-// order you'd like the values sorted, e.g. Categories?$orderby=CategoryName desc. Optional. count is the Boolean value
-// of true or false to request a count of the matching resources included with the resources in the response, e.g.
-// Categories?$count=true. Optional.
-func (client StorageAccountsClient) ListByAccount(ctx context.Context, filter *string, top *int32, skip *int32, selectParameter *string, orderby *string, count *bool) (*StorageAccountInformationListResult, error) {
+// resourceGroupName is the name of the Azure resource group. accountName is the name of the Data Lake Analytics
+// account. filter is the OData filter. Optional. top is the number of items to return. Optional. skip is the number of
+// items to skip over before returning elements. Optional. selectParameter is oData Select statement. Limits the
+// properties on each entry to just those requested, e.g. Categories?$select=CategoryName,Description. Optional.
+// orderby is orderBy clause. One or more comma-separated expressions with an optional "asc" (the default) or "desc"
+// depending on the order you'd like the values sorted, e.g. Categories?$orderby=CategoryName desc. Optional. count is
+// the Boolean value of true or false to request a count of the matching resources included with the resources in the
+// response, e.g. Categories?$count=true. Optional.
+func (client StorageAccountsClient) ListByAccount(ctx context.Context, resourceGroupName string, accountName string, filter *string, top *int32, skip *int32, selectParameter *string, orderby *string, count *bool) (*StorageAccountInformationListResult, error) {
 	if err := validate([]validation{
 		{targetValue: top,
 			constraints: []constraint{{target: "top", name: null, rule: false,
@@ -257,7 +262,7 @@ func (client StorageAccountsClient) ListByAccount(ctx context.Context, filter *s
 				chain: []constraint{{target: "skip", name: inclusiveMinimum, rule: 1, chain: nil}}}}}}); err != nil {
 		return nil, err
 	}
-	req, err := client.listByAccountPreparer(filter, top, skip, selectParameter, orderby, count)
+	req, err := client.listByAccountPreparer(resourceGroupName, accountName, filter, top, skip, selectParameter, orderby, count)
 	if err != nil {
 		return nil, err
 	}
@@ -269,7 +274,7 @@ func (client StorageAccountsClient) ListByAccount(ctx context.Context, filter *s
 }
 
 // listByAccountPreparer prepares the ListByAccount request.
-func (client StorageAccountsClient) listByAccountPreparer(filter *string, top *int32, skip *int32, selectParameter *string, orderby *string, count *bool) (pipeline.Request, error) {
+func (client StorageAccountsClient) listByAccountPreparer(resourceGroupName string, accountName string, filter *string, top *int32, skip *int32, selectParameter *string, orderby *string, count *bool) (pipeline.Request, error) {
 	u := client.url
 	u.Path = "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DataLakeAnalytics/accounts/{accountName}/storageAccounts"
 	req, err := pipeline.NewRequest("GET", u, nil)
@@ -327,10 +332,11 @@ func (client StorageAccountsClient) listByAccountResponder(resp pipeline.Respons
 // ListSasTokens gets the SAS token associated with the specified Data Lake Analytics and Azure Storage account and
 // container combination.
 //
-// storageAccountName is the name of the Azure storage account for which the SAS token is being requested.
+// resourceGroupName is the name of the Azure resource group. accountName is the name of the Data Lake Analytics
+// account. storageAccountName is the name of the Azure storage account for which the SAS token is being requested.
 // containerName is the name of the Azure storage container for which the SAS token is being requested.
-func (client StorageAccountsClient) ListSasTokens(ctx context.Context, storageAccountName string, containerName string) (*SasTokenInformationListResult, error) {
-	req, err := client.listSasTokensPreparer(storageAccountName, containerName)
+func (client StorageAccountsClient) ListSasTokens(ctx context.Context, resourceGroupName string, accountName string, storageAccountName string, containerName string) (*SasTokenInformationListResult, error) {
+	req, err := client.listSasTokensPreparer(resourceGroupName, accountName, storageAccountName, containerName)
 	if err != nil {
 		return nil, err
 	}
@@ -342,7 +348,7 @@ func (client StorageAccountsClient) ListSasTokens(ctx context.Context, storageAc
 }
 
 // listSasTokensPreparer prepares the ListSasTokens request.
-func (client StorageAccountsClient) listSasTokensPreparer(storageAccountName string, containerName string) (pipeline.Request, error) {
+func (client StorageAccountsClient) listSasTokensPreparer(resourceGroupName string, accountName string, storageAccountName string, containerName string) (pipeline.Request, error) {
 	u := client.url
 	u.Path = "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DataLakeAnalytics/accounts/{accountName}/storageAccounts/{storageAccountName}/containers/{containerName}/listSasTokens"
 	req, err := pipeline.NewRequest("POST", u, nil)
@@ -382,9 +388,10 @@ func (client StorageAccountsClient) listSasTokensResponder(resp pipeline.Respons
 // ListStorageContainers lists the Azure Storage containers, if any, associated with the specified Data Lake Analytics
 // and Azure Storage account combination. The response includes a link to the next page of results, if any.
 //
-// storageAccountName is the name of the Azure storage account from which to list blob containers.
-func (client StorageAccountsClient) ListStorageContainers(ctx context.Context, storageAccountName string) (*StorageContainerListResult, error) {
-	req, err := client.listStorageContainersPreparer(storageAccountName)
+// resourceGroupName is the name of the Azure resource group. accountName is the name of the Data Lake Analytics
+// account. storageAccountName is the name of the Azure storage account from which to list blob containers.
+func (client StorageAccountsClient) ListStorageContainers(ctx context.Context, resourceGroupName string, accountName string, storageAccountName string) (*StorageContainerListResult, error) {
+	req, err := client.listStorageContainersPreparer(resourceGroupName, accountName, storageAccountName)
 	if err != nil {
 		return nil, err
 	}
@@ -396,7 +403,7 @@ func (client StorageAccountsClient) ListStorageContainers(ctx context.Context, s
 }
 
 // listStorageContainersPreparer prepares the ListStorageContainers request.
-func (client StorageAccountsClient) listStorageContainersPreparer(storageAccountName string) (pipeline.Request, error) {
+func (client StorageAccountsClient) listStorageContainersPreparer(resourceGroupName string, accountName string, storageAccountName string) (pipeline.Request, error) {
 	u := client.url
 	u.Path = "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DataLakeAnalytics/accounts/{accountName}/storageAccounts/{storageAccountName}/containers"
 	req, err := pipeline.NewRequest("GET", u, nil)
@@ -436,10 +443,11 @@ func (client StorageAccountsClient) listStorageContainersResponder(resp pipeline
 // Update updates the Data Lake Analytics account to replace Azure Storage blob account details, such as the access key
 // and/or suffix.
 //
-// storageAccountName is the Azure Storage account to modify parameters is the parameters containing the access key and
-// suffix to update the storage account with, if any. Passing nothing results in no change.
-func (client StorageAccountsClient) Update(ctx context.Context, storageAccountName string, parameters *UpdateStorageAccountParameters) (*http.Response, error) {
-	req, err := client.updatePreparer(storageAccountName, parameters)
+// resourceGroupName is the name of the Azure resource group. accountName is the name of the Data Lake Analytics
+// account. storageAccountName is the Azure Storage account to modify parameters is the parameters containing the
+// access key and suffix to update the storage account with, if any. Passing nothing results in no change.
+func (client StorageAccountsClient) Update(ctx context.Context, resourceGroupName string, accountName string, storageAccountName string, parameters *UpdateStorageAccountParameters) (*http.Response, error) {
+	req, err := client.updatePreparer(resourceGroupName, accountName, storageAccountName, parameters)
 	if err != nil {
 		return nil, err
 	}
@@ -451,7 +459,7 @@ func (client StorageAccountsClient) Update(ctx context.Context, storageAccountNa
 }
 
 // updatePreparer prepares the Update request.
-func (client StorageAccountsClient) updatePreparer(storageAccountName string, parameters *UpdateStorageAccountParameters) (pipeline.Request, error) {
+func (client StorageAccountsClient) updatePreparer(resourceGroupName string, accountName string, storageAccountName string, parameters *UpdateStorageAccountParameters) (pipeline.Request, error) {
 	u := client.url
 	u.Path = "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DataLakeAnalytics/accounts/{accountName}/storageAccounts/{storageAccountName}"
 	req, err := pipeline.NewRequest("PATCH", u, nil)

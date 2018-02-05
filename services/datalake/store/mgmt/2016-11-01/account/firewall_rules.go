@@ -39,9 +39,10 @@ func NewFirewallRulesClient(p pipeline.Pipeline) FirewallRulesClient {
 // CreateOrUpdate creates or updates the specified firewall rule. During update, the firewall rule with the specified
 // name will be replaced with this new firewall rule.
 //
+// resourceGroupName is the name of the Azure resource group. accountName is the name of the Data Lake Store account.
 // firewallRuleName is the name of the firewall rule to create or update. parameters is parameters supplied to create
 // or update the firewall rule.
-func (client FirewallRulesClient) CreateOrUpdate(ctx context.Context, firewallRuleName string, parameters CreateOrUpdateFirewallRuleParameters) (*FirewallRule, error) {
+func (client FirewallRulesClient) CreateOrUpdate(ctx context.Context, resourceGroupName string, accountName string, firewallRuleName string, parameters CreateOrUpdateFirewallRuleParameters) (*FirewallRule, error) {
 	if err := validate([]validation{
 		{targetValue: parameters,
 			constraints: []constraint{{target: "parameters.CreateOrUpdateFirewallRuleProperties", name: null, rule: true,
@@ -50,7 +51,7 @@ func (client FirewallRulesClient) CreateOrUpdate(ctx context.Context, firewallRu
 				}}}}}); err != nil {
 		return nil, err
 	}
-	req, err := client.createOrUpdatePreparer(firewallRuleName, parameters)
+	req, err := client.createOrUpdatePreparer(resourceGroupName, accountName, firewallRuleName, parameters)
 	if err != nil {
 		return nil, err
 	}
@@ -62,7 +63,7 @@ func (client FirewallRulesClient) CreateOrUpdate(ctx context.Context, firewallRu
 }
 
 // createOrUpdatePreparer prepares the CreateOrUpdate request.
-func (client FirewallRulesClient) createOrUpdatePreparer(firewallRuleName string, parameters CreateOrUpdateFirewallRuleParameters) (pipeline.Request, error) {
+func (client FirewallRulesClient) createOrUpdatePreparer(resourceGroupName string, accountName string, firewallRuleName string, parameters CreateOrUpdateFirewallRuleParameters) (pipeline.Request, error) {
 	u := client.url
 	u.Path = "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DataLakeStore/accounts/{accountName}/firewallRules/{firewallRuleName}"
 	req, err := pipeline.NewRequest("PUT", u, nil)
@@ -110,9 +111,10 @@ func (client FirewallRulesClient) createOrUpdateResponder(resp pipeline.Response
 
 // Delete deletes the specified firewall rule from the specified Data Lake Store account
 //
+// resourceGroupName is the name of the Azure resource group. accountName is the name of the Data Lake Store account.
 // firewallRuleName is the name of the firewall rule to delete.
-func (client FirewallRulesClient) Delete(ctx context.Context, firewallRuleName string) (*http.Response, error) {
-	req, err := client.deletePreparer(firewallRuleName)
+func (client FirewallRulesClient) Delete(ctx context.Context, resourceGroupName string, accountName string, firewallRuleName string) (*http.Response, error) {
+	req, err := client.deletePreparer(resourceGroupName, accountName, firewallRuleName)
 	if err != nil {
 		return nil, err
 	}
@@ -124,7 +126,7 @@ func (client FirewallRulesClient) Delete(ctx context.Context, firewallRuleName s
 }
 
 // deletePreparer prepares the Delete request.
-func (client FirewallRulesClient) deletePreparer(firewallRuleName string) (pipeline.Request, error) {
+func (client FirewallRulesClient) deletePreparer(resourceGroupName string, accountName string, firewallRuleName string) (pipeline.Request, error) {
 	u := client.url
 	u.Path = "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DataLakeStore/accounts/{accountName}/firewallRules/{firewallRuleName}"
 	req, err := pipeline.NewRequest("DELETE", u, nil)
@@ -148,9 +150,10 @@ func (client FirewallRulesClient) deleteResponder(resp pipeline.Response) (pipel
 
 // Get gets the specified Data Lake Store firewall rule.
 //
+// resourceGroupName is the name of the Azure resource group. accountName is the name of the Data Lake Store account.
 // firewallRuleName is the name of the firewall rule to retrieve.
-func (client FirewallRulesClient) Get(ctx context.Context, firewallRuleName string) (*FirewallRule, error) {
-	req, err := client.getPreparer(firewallRuleName)
+func (client FirewallRulesClient) Get(ctx context.Context, resourceGroupName string, accountName string, firewallRuleName string) (*FirewallRule, error) {
+	req, err := client.getPreparer(resourceGroupName, accountName, firewallRuleName)
 	if err != nil {
 		return nil, err
 	}
@@ -162,7 +165,7 @@ func (client FirewallRulesClient) Get(ctx context.Context, firewallRuleName stri
 }
 
 // getPreparer prepares the Get request.
-func (client FirewallRulesClient) getPreparer(firewallRuleName string) (pipeline.Request, error) {
+func (client FirewallRulesClient) getPreparer(resourceGroupName string, accountName string, firewallRuleName string) (pipeline.Request, error) {
 	u := client.url
 	u.Path = "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DataLakeStore/accounts/{accountName}/firewallRules/{firewallRuleName}"
 	req, err := pipeline.NewRequest("GET", u, nil)
@@ -200,8 +203,10 @@ func (client FirewallRulesClient) getResponder(resp pipeline.Response) (pipeline
 }
 
 // ListByAccount lists the Data Lake Store firewall rules within the specified Data Lake Store account.
-func (client FirewallRulesClient) ListByAccount(ctx context.Context) (*FirewallRuleListResult, error) {
-	req, err := client.listByAccountPreparer()
+//
+// resourceGroupName is the name of the Azure resource group. accountName is the name of the Data Lake Store account.
+func (client FirewallRulesClient) ListByAccount(ctx context.Context, resourceGroupName string, accountName string) (*FirewallRuleListResult, error) {
+	req, err := client.listByAccountPreparer(resourceGroupName, accountName)
 	if err != nil {
 		return nil, err
 	}
@@ -213,7 +218,7 @@ func (client FirewallRulesClient) ListByAccount(ctx context.Context) (*FirewallR
 }
 
 // listByAccountPreparer prepares the ListByAccount request.
-func (client FirewallRulesClient) listByAccountPreparer() (pipeline.Request, error) {
+func (client FirewallRulesClient) listByAccountPreparer(resourceGroupName string, accountName string) (pipeline.Request, error) {
 	u := client.url
 	u.Path = "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DataLakeStore/accounts/{accountName}/firewallRules"
 	req, err := pipeline.NewRequest("GET", u, nil)
@@ -252,10 +257,11 @@ func (client FirewallRulesClient) listByAccountResponder(resp pipeline.Response)
 
 // Update updates the specified firewall rule.
 //
+// resourceGroupName is the name of the Azure resource group. accountName is the name of the Data Lake Store account.
 // firewallRuleName is the name of the firewall rule to update. parameters is parameters supplied to update the
 // firewall rule.
-func (client FirewallRulesClient) Update(ctx context.Context, firewallRuleName string, parameters *UpdateFirewallRuleParameters) (*FirewallRule, error) {
-	req, err := client.updatePreparer(firewallRuleName, parameters)
+func (client FirewallRulesClient) Update(ctx context.Context, resourceGroupName string, accountName string, firewallRuleName string, parameters *UpdateFirewallRuleParameters) (*FirewallRule, error) {
+	req, err := client.updatePreparer(resourceGroupName, accountName, firewallRuleName, parameters)
 	if err != nil {
 		return nil, err
 	}
@@ -267,7 +273,7 @@ func (client FirewallRulesClient) Update(ctx context.Context, firewallRuleName s
 }
 
 // updatePreparer prepares the Update request.
-func (client FirewallRulesClient) updatePreparer(firewallRuleName string, parameters *UpdateFirewallRuleParameters) (pipeline.Request, error) {
+func (client FirewallRulesClient) updatePreparer(resourceGroupName string, accountName string, firewallRuleName string, parameters *UpdateFirewallRuleParameters) (pipeline.Request, error) {
 	u := client.url
 	u.Path = "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DataLakeStore/accounts/{accountName}/firewallRules/{firewallRuleName}"
 	req, err := pipeline.NewRequest("PATCH", u, nil)

@@ -39,10 +39,11 @@ func NewComputePoliciesClient(p pipeline.Pipeline) ComputePoliciesClient {
 // CreateOrUpdate creates or updates the specified compute policy. During update, the compute policy with the specified
 // name will be replaced with this new compute policy. An account supports, at most, 50 policies
 //
-// computePolicyName is the name of the compute policy to create or update. parameters is parameters supplied to create
-// or update the compute policy. The max degree of parallelism per job property, min priority per job property, or both
-// must be present.
-func (client ComputePoliciesClient) CreateOrUpdate(ctx context.Context, computePolicyName string, parameters CreateOrUpdateComputePolicyParameters) (*ComputePolicy, error) {
+// resourceGroupName is the name of the Azure resource group. accountName is the name of the Data Lake Analytics
+// account. computePolicyName is the name of the compute policy to create or update. parameters is parameters supplied
+// to create or update the compute policy. The max degree of parallelism per job property, min priority per job
+// property, or both must be present.
+func (client ComputePoliciesClient) CreateOrUpdate(ctx context.Context, resourceGroupName string, accountName string, computePolicyName string, parameters CreateOrUpdateComputePolicyParameters) (*ComputePolicy, error) {
 	if err := validate([]validation{
 		{targetValue: parameters,
 			constraints: []constraint{{target: "parameters.CreateOrUpdateComputePolicyProperties", name: null, rule: true,
@@ -54,7 +55,7 @@ func (client ComputePoliciesClient) CreateOrUpdate(ctx context.Context, computeP
 				}}}}}); err != nil {
 		return nil, err
 	}
-	req, err := client.createOrUpdatePreparer(computePolicyName, parameters)
+	req, err := client.createOrUpdatePreparer(resourceGroupName, accountName, computePolicyName, parameters)
 	if err != nil {
 		return nil, err
 	}
@@ -66,7 +67,7 @@ func (client ComputePoliciesClient) CreateOrUpdate(ctx context.Context, computeP
 }
 
 // createOrUpdatePreparer prepares the CreateOrUpdate request.
-func (client ComputePoliciesClient) createOrUpdatePreparer(computePolicyName string, parameters CreateOrUpdateComputePolicyParameters) (pipeline.Request, error) {
+func (client ComputePoliciesClient) createOrUpdatePreparer(resourceGroupName string, accountName string, computePolicyName string, parameters CreateOrUpdateComputePolicyParameters) (pipeline.Request, error) {
 	u := client.url
 	u.Path = "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DataLakeAnalytics/accounts/{accountName}/computePolicies/{computePolicyName}"
 	req, err := pipeline.NewRequest("PUT", u, nil)
@@ -114,9 +115,10 @@ func (client ComputePoliciesClient) createOrUpdateResponder(resp pipeline.Respon
 
 // Delete deletes the specified compute policy from the specified Data Lake Analytics account
 //
-// computePolicyName is the name of the compute policy to delete.
-func (client ComputePoliciesClient) Delete(ctx context.Context, computePolicyName string) (*http.Response, error) {
-	req, err := client.deletePreparer(computePolicyName)
+// resourceGroupName is the name of the Azure resource group. accountName is the name of the Data Lake Analytics
+// account. computePolicyName is the name of the compute policy to delete.
+func (client ComputePoliciesClient) Delete(ctx context.Context, resourceGroupName string, accountName string, computePolicyName string) (*http.Response, error) {
+	req, err := client.deletePreparer(resourceGroupName, accountName, computePolicyName)
 	if err != nil {
 		return nil, err
 	}
@@ -128,7 +130,7 @@ func (client ComputePoliciesClient) Delete(ctx context.Context, computePolicyNam
 }
 
 // deletePreparer prepares the Delete request.
-func (client ComputePoliciesClient) deletePreparer(computePolicyName string) (pipeline.Request, error) {
+func (client ComputePoliciesClient) deletePreparer(resourceGroupName string, accountName string, computePolicyName string) (pipeline.Request, error) {
 	u := client.url
 	u.Path = "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DataLakeAnalytics/accounts/{accountName}/computePolicies/{computePolicyName}"
 	req, err := pipeline.NewRequest("DELETE", u, nil)
@@ -152,9 +154,10 @@ func (client ComputePoliciesClient) deleteResponder(resp pipeline.Response) (pip
 
 // Get gets the specified Data Lake Analytics compute policy.
 //
-// computePolicyName is the name of the compute policy to retrieve.
-func (client ComputePoliciesClient) Get(ctx context.Context, computePolicyName string) (*ComputePolicy, error) {
-	req, err := client.getPreparer(computePolicyName)
+// resourceGroupName is the name of the Azure resource group. accountName is the name of the Data Lake Analytics
+// account. computePolicyName is the name of the compute policy to retrieve.
+func (client ComputePoliciesClient) Get(ctx context.Context, resourceGroupName string, accountName string, computePolicyName string) (*ComputePolicy, error) {
+	req, err := client.getPreparer(resourceGroupName, accountName, computePolicyName)
 	if err != nil {
 		return nil, err
 	}
@@ -166,7 +169,7 @@ func (client ComputePoliciesClient) Get(ctx context.Context, computePolicyName s
 }
 
 // getPreparer prepares the Get request.
-func (client ComputePoliciesClient) getPreparer(computePolicyName string) (pipeline.Request, error) {
+func (client ComputePoliciesClient) getPreparer(resourceGroupName string, accountName string, computePolicyName string) (pipeline.Request, error) {
 	u := client.url
 	u.Path = "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DataLakeAnalytics/accounts/{accountName}/computePolicies/{computePolicyName}"
 	req, err := pipeline.NewRequest("GET", u, nil)
@@ -205,8 +208,11 @@ func (client ComputePoliciesClient) getResponder(resp pipeline.Response) (pipeli
 
 // ListByAccount lists the Data Lake Analytics compute policies within the specified Data Lake Analytics account. An
 // account supports, at most, 50 policies
-func (client ComputePoliciesClient) ListByAccount(ctx context.Context) (*ComputePolicyListResult, error) {
-	req, err := client.listByAccountPreparer()
+//
+// resourceGroupName is the name of the Azure resource group. accountName is the name of the Data Lake Analytics
+// account.
+func (client ComputePoliciesClient) ListByAccount(ctx context.Context, resourceGroupName string, accountName string) (*ComputePolicyListResult, error) {
+	req, err := client.listByAccountPreparer(resourceGroupName, accountName)
 	if err != nil {
 		return nil, err
 	}
@@ -218,7 +224,7 @@ func (client ComputePoliciesClient) ListByAccount(ctx context.Context) (*Compute
 }
 
 // listByAccountPreparer prepares the ListByAccount request.
-func (client ComputePoliciesClient) listByAccountPreparer() (pipeline.Request, error) {
+func (client ComputePoliciesClient) listByAccountPreparer(resourceGroupName string, accountName string) (pipeline.Request, error) {
 	u := client.url
 	u.Path = "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DataLakeAnalytics/accounts/{accountName}/computePolicies"
 	req, err := pipeline.NewRequest("GET", u, nil)
@@ -257,10 +263,11 @@ func (client ComputePoliciesClient) listByAccountResponder(resp pipeline.Respons
 
 // Update updates the specified compute policy.
 //
-// computePolicyName is the name of the compute policy to update. parameters is parameters supplied to update the
-// compute policy.
-func (client ComputePoliciesClient) Update(ctx context.Context, computePolicyName string, parameters *UpdateComputePolicyParameters) (*ComputePolicy, error) {
-	req, err := client.updatePreparer(computePolicyName, parameters)
+// resourceGroupName is the name of the Azure resource group. accountName is the name of the Data Lake Analytics
+// account. computePolicyName is the name of the compute policy to update. parameters is parameters supplied to update
+// the compute policy.
+func (client ComputePoliciesClient) Update(ctx context.Context, resourceGroupName string, accountName string, computePolicyName string, parameters *UpdateComputePolicyParameters) (*ComputePolicy, error) {
+	req, err := client.updatePreparer(resourceGroupName, accountName, computePolicyName, parameters)
 	if err != nil {
 		return nil, err
 	}
@@ -272,7 +279,7 @@ func (client ComputePoliciesClient) Update(ctx context.Context, computePolicyNam
 }
 
 // updatePreparer prepares the Update request.
-func (client ComputePoliciesClient) updatePreparer(computePolicyName string, parameters *UpdateComputePolicyParameters) (pipeline.Request, error) {
+func (client ComputePoliciesClient) updatePreparer(resourceGroupName string, accountName string, computePolicyName string, parameters *UpdateComputePolicyParameters) (pipeline.Request, error) {
 	u := client.url
 	u.Path = "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DataLakeAnalytics/accounts/{accountName}/computePolicies/{computePolicyName}"
 	req, err := pipeline.NewRequest("PATCH", u, nil)
