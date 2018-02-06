@@ -1206,6 +1206,13 @@ type CheckNameAvailabilityResponse struct {
 	Reason CheckNameAvailabilityReason `json:"reason,omitempty"`
 }
 
+// CreateDatabaseRestorePointDefinition contains the information necessary to perform a create database restore point
+// operation.
+type CreateDatabaseRestorePointDefinition struct {
+	// RestorePointLabel - The restore point label to apply
+	RestorePointLabel *string `json:"restorePointLabel,omitempty"`
+}
+
 // Database represents a database.
 type Database struct {
 	autorest.Response `json:"-"`
@@ -1738,6 +1745,237 @@ type DatabaseProperties struct {
 	SampleName SampleName `json:"sampleName,omitempty"`
 	// ZoneRedundant - Whether or not this database is zone redundant, which means the replicas of this database will be spread across multiple availability zones.
 	ZoneRedundant *bool `json:"zoneRedundant,omitempty"`
+}
+
+// DatabaseRestorePoint database restore points.
+type DatabaseRestorePoint struct {
+	autorest.Response `json:"-"`
+	// ID - Resource ID.
+	ID *string `json:"id,omitempty"`
+	// Name - Resource name.
+	Name *string `json:"name,omitempty"`
+	// Type - Resource type.
+	Type *string `json:"type,omitempty"`
+	// Location - Resource location.
+	Location *string `json:"location,omitempty"`
+	// DatabaseRestorePointProperties - Resource properties.
+	*DatabaseRestorePointProperties `json:"properties,omitempty"`
+}
+
+// UnmarshalJSON is the custom unmarshaler for DatabaseRestorePoint struct.
+func (drp *DatabaseRestorePoint) UnmarshalJSON(body []byte) error {
+	var m map[string]*json.RawMessage
+	err := json.Unmarshal(body, &m)
+	if err != nil {
+		return err
+	}
+	var v *json.RawMessage
+
+	v = m["location"]
+	if v != nil {
+		var location string
+		err = json.Unmarshal(*m["location"], &location)
+		if err != nil {
+			return err
+		}
+		drp.Location = &location
+	}
+
+	v = m["properties"]
+	if v != nil {
+		var properties DatabaseRestorePointProperties
+		err = json.Unmarshal(*m["properties"], &properties)
+		if err != nil {
+			return err
+		}
+		drp.DatabaseRestorePointProperties = &properties
+	}
+
+	v = m["id"]
+	if v != nil {
+		var ID string
+		err = json.Unmarshal(*m["id"], &ID)
+		if err != nil {
+			return err
+		}
+		drp.ID = &ID
+	}
+
+	v = m["name"]
+	if v != nil {
+		var name string
+		err = json.Unmarshal(*m["name"], &name)
+		if err != nil {
+			return err
+		}
+		drp.Name = &name
+	}
+
+	v = m["type"]
+	if v != nil {
+		var typeVar string
+		err = json.Unmarshal(*m["type"], &typeVar)
+		if err != nil {
+			return err
+		}
+		drp.Type = &typeVar
+	}
+
+	return nil
+}
+
+// DatabaseRestorePointListResult a list of long term retention bacukps.
+type DatabaseRestorePointListResult struct {
+	autorest.Response `json:"-"`
+	// Value - Array of results.
+	Value *[]DatabaseRestorePoint `json:"value,omitempty"`
+	// NextLink - Link to retrieve next page of results.
+	NextLink *string `json:"nextLink,omitempty"`
+}
+
+// DatabaseRestorePointListResultIterator provides access to a complete listing of DatabaseRestorePoint values.
+type DatabaseRestorePointListResultIterator struct {
+	i    int
+	page DatabaseRestorePointListResultPage
+}
+
+// Next advances to the next value.  If there was an error making
+// the request the iterator does not advance and the error is returned.
+func (iter *DatabaseRestorePointListResultIterator) Next() error {
+	iter.i++
+	if iter.i < len(iter.page.Values()) {
+		return nil
+	}
+	err := iter.page.Next()
+	if err != nil {
+		iter.i--
+		return err
+	}
+	iter.i = 0
+	return nil
+}
+
+// NotDone returns true if the enumeration should be started or is not yet complete.
+func (iter DatabaseRestorePointListResultIterator) NotDone() bool {
+	return iter.page.NotDone() && iter.i < len(iter.page.Values())
+}
+
+// Response returns the raw server response from the last page request.
+func (iter DatabaseRestorePointListResultIterator) Response() DatabaseRestorePointListResult {
+	return iter.page.Response()
+}
+
+// Value returns the current value or a zero-initialized value if the
+// iterator has advanced beyond the end of the collection.
+func (iter DatabaseRestorePointListResultIterator) Value() DatabaseRestorePoint {
+	if !iter.page.NotDone() {
+		return DatabaseRestorePoint{}
+	}
+	return iter.page.Values()[iter.i]
+}
+
+// IsEmpty returns true if the ListResult contains no values.
+func (drplr DatabaseRestorePointListResult) IsEmpty() bool {
+	return drplr.Value == nil || len(*drplr.Value) == 0
+}
+
+// databaseRestorePointListResultPreparer prepares a request to retrieve the next set of results.
+// It returns nil if no more results exist.
+func (drplr DatabaseRestorePointListResult) databaseRestorePointListResultPreparer() (*http.Request, error) {
+	if drplr.NextLink == nil || len(to.String(drplr.NextLink)) < 1 {
+		return nil, nil
+	}
+	return autorest.Prepare(&http.Request{},
+		autorest.AsJSON(),
+		autorest.AsGet(),
+		autorest.WithBaseURL(to.String(drplr.NextLink)))
+}
+
+// DatabaseRestorePointListResultPage contains a page of DatabaseRestorePoint values.
+type DatabaseRestorePointListResultPage struct {
+	fn    func(DatabaseRestorePointListResult) (DatabaseRestorePointListResult, error)
+	drplr DatabaseRestorePointListResult
+}
+
+// Next advances to the next page of values.  If there was an error making
+// the request the page does not advance and the error is returned.
+func (page *DatabaseRestorePointListResultPage) Next() error {
+	next, err := page.fn(page.drplr)
+	if err != nil {
+		return err
+	}
+	page.drplr = next
+	return nil
+}
+
+// NotDone returns true if the page enumeration should be started or is not yet complete.
+func (page DatabaseRestorePointListResultPage) NotDone() bool {
+	return !page.drplr.IsEmpty()
+}
+
+// Response returns the raw server response from the last page request.
+func (page DatabaseRestorePointListResultPage) Response() DatabaseRestorePointListResult {
+	return page.drplr
+}
+
+// Values returns the slice of values for the current page or nil if there are no values.
+func (page DatabaseRestorePointListResultPage) Values() []DatabaseRestorePoint {
+	if page.drplr.IsEmpty() {
+		return nil
+	}
+	return *page.drplr.Value
+}
+
+// DatabaseRestorePointProperties properties of a database restore point
+type DatabaseRestorePointProperties struct {
+	// RestorePointType - The type of restore point. Possible values include: 'CONTINUOUS', 'DISCRETE'
+	RestorePointType RestorePointType `json:"restorePointType,omitempty"`
+	// EarliestRestoreDate - The earliest time to which this database can be restored
+	EarliestRestoreDate *date.Time `json:"earliestRestoreDate,omitempty"`
+	// RestorePointCreationDate - The time the backup was taken
+	RestorePointCreationDate *date.Time `json:"restorePointCreationDate,omitempty"`
+	// RestorePointLabel - The label of restore point for backup request by user
+	RestorePointLabel *string `json:"restorePointLabel,omitempty"`
+}
+
+// DatabaseRestorePointsCreateFuture an abstraction for monitoring and retrieving the results of a long-running
+// operation.
+type DatabaseRestorePointsCreateFuture struct {
+	azure.Future
+	req *http.Request
+}
+
+// Result returns the result of the asynchronous operation.
+// If the operation has not completed it will return an error.
+func (future DatabaseRestorePointsCreateFuture) Result(client DatabaseRestorePointsClient) (drp DatabaseRestorePoint, err error) {
+	var done bool
+	done, err = future.Done(client)
+	if err != nil {
+		err = autorest.NewErrorWithError(err, "sql.DatabaseRestorePointsCreateFuture", "Result", future.Response(), "Polling failure")
+		return
+	}
+	if !done {
+		return drp, azure.NewAsyncOpIncompleteError("sql.DatabaseRestorePointsCreateFuture")
+	}
+	if future.PollingMethod() == azure.PollingLocation {
+		drp, err = client.CreateResponder(future.Response())
+		if err != nil {
+			err = autorest.NewErrorWithError(err, "sql.DatabaseRestorePointsCreateFuture", "Result", future.Response(), "Failure responding to request")
+		}
+		return
+	}
+	var resp *http.Response
+	resp, err = autorest.SendWithSender(client, autorest.ChangeToGet(future.req),
+		autorest.DoRetryForStatusCodes(client.RetryAttempts, client.RetryDuration, autorest.StatusCodesForRetry...))
+	if err != nil {
+		err = autorest.NewErrorWithError(err, "sql.DatabaseRestorePointsCreateFuture", "Result", resp, "Failure sending request")
+		return
+	}
+	drp, err = client.CreateResponder(resp)
+	if err != nil {
+		err = autorest.NewErrorWithError(err, "sql.DatabaseRestorePointsCreateFuture", "Result", resp, "Failure responding to request")
+	}
+	return
 }
 
 // DatabasesCreateImportOperationFuture an abstraction for monitoring and retrieving the results of a long-running
@@ -5022,87 +5260,6 @@ type RestorableDroppedDatabaseProperties struct {
 	// DeletionDate - The deletion date of the database (ISO8601 format)
 	DeletionDate *date.Time `json:"deletionDate,omitempty"`
 	// EarliestRestoreDate - The earliest restore date of the database (ISO8601 format)
-	EarliestRestoreDate *date.Time `json:"earliestRestoreDate,omitempty"`
-}
-
-// RestorePoint a database restore point.
-type RestorePoint struct {
-	// ID - Resource ID.
-	ID *string `json:"id,omitempty"`
-	// Name - Resource name.
-	Name *string `json:"name,omitempty"`
-	// Type - Resource type.
-	Type *string `json:"type,omitempty"`
-	// RestorePointProperties - The properties of the restore point.
-	*RestorePointProperties `json:"properties,omitempty"`
-}
-
-// UnmarshalJSON is the custom unmarshaler for RestorePoint struct.
-func (rp *RestorePoint) UnmarshalJSON(body []byte) error {
-	var m map[string]*json.RawMessage
-	err := json.Unmarshal(body, &m)
-	if err != nil {
-		return err
-	}
-	var v *json.RawMessage
-
-	v = m["properties"]
-	if v != nil {
-		var properties RestorePointProperties
-		err = json.Unmarshal(*m["properties"], &properties)
-		if err != nil {
-			return err
-		}
-		rp.RestorePointProperties = &properties
-	}
-
-	v = m["id"]
-	if v != nil {
-		var ID string
-		err = json.Unmarshal(*m["id"], &ID)
-		if err != nil {
-			return err
-		}
-		rp.ID = &ID
-	}
-
-	v = m["name"]
-	if v != nil {
-		var name string
-		err = json.Unmarshal(*m["name"], &name)
-		if err != nil {
-			return err
-		}
-		rp.Name = &name
-	}
-
-	v = m["type"]
-	if v != nil {
-		var typeVar string
-		err = json.Unmarshal(*m["type"], &typeVar)
-		if err != nil {
-			return err
-		}
-		rp.Type = &typeVar
-	}
-
-	return nil
-}
-
-// RestorePointListResult the response to a list database restore points request.
-type RestorePointListResult struct {
-	autorest.Response `json:"-"`
-	// Value - The list of database restore points.
-	Value *[]RestorePoint `json:"value,omitempty"`
-}
-
-// RestorePointProperties represents the properties of a database restore point.
-type RestorePointProperties struct {
-	// RestorePointType - The restore point type of the database restore point. Possible values include: 'DISCRETE', 'CONTINUOUS'
-	RestorePointType RestorePointType `json:"restorePointType,omitempty"`
-	// RestorePointCreationDate - Restore point creation time (ISO8601 format). Populated when restorePointType = CONTINUOUS. Null otherwise.
-	RestorePointCreationDate *date.Time `json:"restorePointCreationDate,omitempty"`
-	// EarliestRestoreDate - Earliest restore time (ISO8601 format). Populated when restorePointType = DISCRETE. Null otherwise.
 	EarliestRestoreDate *date.Time `json:"earliestRestoreDate,omitempty"`
 }
 
