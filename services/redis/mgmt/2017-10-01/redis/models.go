@@ -453,22 +453,30 @@ func (future LinkedServerCreateFuture) Result(client LinkedServerClient) (lswp L
 	var done bool
 	done, err = future.Done(client)
 	if err != nil {
+		err = autorest.NewErrorWithError(err, "redis.LinkedServerCreateFuture", "Result", future.Response(), "Polling failure")
 		return
 	}
 	if !done {
-		return lswp, autorest.NewError("redis.LinkedServerCreateFuture", "Result", "asynchronous operation has not completed")
+		return lswp, azure.NewAsyncOpIncompleteError("redis.LinkedServerCreateFuture")
 	}
 	if future.PollingMethod() == azure.PollingLocation {
 		lswp, err = client.CreateResponder(future.Response())
+		if err != nil {
+			err = autorest.NewErrorWithError(err, "redis.LinkedServerCreateFuture", "Result", future.Response(), "Failure responding to request")
+		}
 		return
 	}
 	var resp *http.Response
 	resp, err = autorest.SendWithSender(client, autorest.ChangeToGet(future.req),
 		autorest.DoRetryForStatusCodes(client.RetryAttempts, client.RetryDuration, autorest.StatusCodesForRetry...))
 	if err != nil {
+		err = autorest.NewErrorWithError(err, "redis.LinkedServerCreateFuture", "Result", resp, "Failure sending request")
 		return
 	}
 	lswp, err = client.CreateResponder(resp)
+	if err != nil {
+		err = autorest.NewErrorWithError(err, "redis.LinkedServerCreateFuture", "Result", resp, "Failure responding to request")
+	}
 	return
 }
 
@@ -1042,22 +1050,30 @@ func (future RedisCreateFuture) Result(client Client) (rt ResourceType, err erro
 	var done bool
 	done, err = future.Done(client)
 	if err != nil {
+		err = autorest.NewErrorWithError(err, "redis.RedisCreateFuture", "Result", future.Response(), "Polling failure")
 		return
 	}
 	if !done {
-		return rt, autorest.NewError("redis.RedisCreateFuture", "Result", "asynchronous operation has not completed")
+		return rt, azure.NewAsyncOpIncompleteError("redis.RedisCreateFuture")
 	}
 	if future.PollingMethod() == azure.PollingLocation {
 		rt, err = client.CreateResponder(future.Response())
+		if err != nil {
+			err = autorest.NewErrorWithError(err, "redis.RedisCreateFuture", "Result", future.Response(), "Failure responding to request")
+		}
 		return
 	}
 	var resp *http.Response
 	resp, err = autorest.SendWithSender(client, autorest.ChangeToGet(future.req),
 		autorest.DoRetryForStatusCodes(client.RetryAttempts, client.RetryDuration, autorest.StatusCodesForRetry...))
 	if err != nil {
+		err = autorest.NewErrorWithError(err, "redis.RedisCreateFuture", "Result", resp, "Failure sending request")
 		return
 	}
 	rt, err = client.CreateResponder(resp)
+	if err != nil {
+		err = autorest.NewErrorWithError(err, "redis.RedisCreateFuture", "Result", resp, "Failure responding to request")
+	}
 	return
 }
 
@@ -1073,22 +1089,30 @@ func (future RedisDeleteFuture) Result(client Client) (ar autorest.Response, err
 	var done bool
 	done, err = future.Done(client)
 	if err != nil {
+		err = autorest.NewErrorWithError(err, "redis.RedisDeleteFuture", "Result", future.Response(), "Polling failure")
 		return
 	}
 	if !done {
-		return ar, autorest.NewError("redis.RedisDeleteFuture", "Result", "asynchronous operation has not completed")
+		return ar, azure.NewAsyncOpIncompleteError("redis.RedisDeleteFuture")
 	}
 	if future.PollingMethod() == azure.PollingLocation {
 		ar, err = client.DeleteResponder(future.Response())
+		if err != nil {
+			err = autorest.NewErrorWithError(err, "redis.RedisDeleteFuture", "Result", future.Response(), "Failure responding to request")
+		}
 		return
 	}
 	var resp *http.Response
 	resp, err = autorest.SendWithSender(client, autorest.ChangeToGet(future.req),
 		autorest.DoRetryForStatusCodes(client.RetryAttempts, client.RetryDuration, autorest.StatusCodesForRetry...))
 	if err != nil {
+		err = autorest.NewErrorWithError(err, "redis.RedisDeleteFuture", "Result", resp, "Failure sending request")
 		return
 	}
 	ar, err = client.DeleteResponder(resp)
+	if err != nil {
+		err = autorest.NewErrorWithError(err, "redis.RedisDeleteFuture", "Result", resp, "Failure responding to request")
+	}
 	return
 }
 
@@ -1104,22 +1128,30 @@ func (future RedisExportDataFuture) Result(client Client) (ar autorest.Response,
 	var done bool
 	done, err = future.Done(client)
 	if err != nil {
+		err = autorest.NewErrorWithError(err, "redis.RedisExportDataFuture", "Result", future.Response(), "Polling failure")
 		return
 	}
 	if !done {
-		return ar, autorest.NewError("redis.RedisExportDataFuture", "Result", "asynchronous operation has not completed")
+		return ar, azure.NewAsyncOpIncompleteError("redis.RedisExportDataFuture")
 	}
 	if future.PollingMethod() == azure.PollingLocation {
 		ar, err = client.ExportDataResponder(future.Response())
+		if err != nil {
+			err = autorest.NewErrorWithError(err, "redis.RedisExportDataFuture", "Result", future.Response(), "Failure responding to request")
+		}
 		return
 	}
 	var resp *http.Response
 	resp, err = autorest.SendWithSender(client, autorest.ChangeToGet(future.req),
 		autorest.DoRetryForStatusCodes(client.RetryAttempts, client.RetryDuration, autorest.StatusCodesForRetry...))
 	if err != nil {
+		err = autorest.NewErrorWithError(err, "redis.RedisExportDataFuture", "Result", resp, "Failure sending request")
 		return
 	}
 	ar, err = client.ExportDataResponder(resp)
+	if err != nil {
+		err = autorest.NewErrorWithError(err, "redis.RedisExportDataFuture", "Result", resp, "Failure responding to request")
+	}
 	return
 }
 
@@ -1135,22 +1167,30 @@ func (future RedisImportDataFuture) Result(client Client) (ar autorest.Response,
 	var done bool
 	done, err = future.Done(client)
 	if err != nil {
+		err = autorest.NewErrorWithError(err, "redis.RedisImportDataFuture", "Result", future.Response(), "Polling failure")
 		return
 	}
 	if !done {
-		return ar, autorest.NewError("redis.RedisImportDataFuture", "Result", "asynchronous operation has not completed")
+		return ar, azure.NewAsyncOpIncompleteError("redis.RedisImportDataFuture")
 	}
 	if future.PollingMethod() == azure.PollingLocation {
 		ar, err = client.ImportDataResponder(future.Response())
+		if err != nil {
+			err = autorest.NewErrorWithError(err, "redis.RedisImportDataFuture", "Result", future.Response(), "Failure responding to request")
+		}
 		return
 	}
 	var resp *http.Response
 	resp, err = autorest.SendWithSender(client, autorest.ChangeToGet(future.req),
 		autorest.DoRetryForStatusCodes(client.RetryAttempts, client.RetryDuration, autorest.StatusCodesForRetry...))
 	if err != nil {
+		err = autorest.NewErrorWithError(err, "redis.RedisImportDataFuture", "Result", resp, "Failure sending request")
 		return
 	}
 	ar, err = client.ImportDataResponder(resp)
+	if err != nil {
+		err = autorest.NewErrorWithError(err, "redis.RedisImportDataFuture", "Result", resp, "Failure responding to request")
+	}
 	return
 }
 
