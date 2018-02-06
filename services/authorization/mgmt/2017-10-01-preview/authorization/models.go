@@ -18,31 +18,13 @@ package authorization
 // Changes may cause incorrect behavior and will be lost if the code is regenerated.
 
 import (
+	"encoding/json"
+	"github.com/Azure/go-autorest/autorest"
+	"github.com/Azure/go-autorest/autorest/to"
 	"net/http"
 )
 
-// Marker represents an opaque value used in paged responses.
-type Marker struct {
-	val *string
-}
-
-// NotDone returns true if the list enumeration should be started or is not yet complete. Specifically, NotDone returns true
-// for a just-initialized (zero value) Marker indicating that you should make an initial request to get a result portion from
-// the service. NotDone also returns true whenever the service returns an interim result portion. NotDone returns false only
-// after the service has returned the final result portion.
-func (m Marker) NotDone() bool {
-	return m.val == nil || *m.val != ""
-}
-
-// UnmarshalXML implements the xml.Unmarshaler interface for Marker.
-func (m *Marker) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
-	var out string
-	err := d.DecodeElement(&out, &start)
-	m.val = &out
-	return err
-}
-
-// ClassicAdministrator - Classic Administrators
+// ClassicAdministrator classic Administrators
 type ClassicAdministrator struct {
 	// ID - The ID of the administrator.
 	ID *string `json:"id,omitempty"`
@@ -50,35 +32,165 @@ type ClassicAdministrator struct {
 	Name *string `json:"name,omitempty"`
 	// Type - The type of the administrator.
 	Type *string `json:"type,omitempty"`
-	// Properties - Properties for the classic administrator.
+	// ClassicAdministratorProperties - Properties for the classic administrator.
 	*ClassicAdministratorProperties `json:"properties,omitempty"`
 }
 
-// ClassicAdministratorListResult - ClassicAdministrator list result information.
+// UnmarshalJSON is the custom unmarshaler for ClassicAdministrator struct.
+func (ca *ClassicAdministrator) UnmarshalJSON(body []byte) error {
+	var m map[string]*json.RawMessage
+	err := json.Unmarshal(body, &m)
+	if err != nil {
+		return err
+	}
+	var v *json.RawMessage
+
+	v = m["id"]
+	if v != nil {
+		var ID string
+		err = json.Unmarshal(*m["id"], &ID)
+		if err != nil {
+			return err
+		}
+		ca.ID = &ID
+	}
+
+	v = m["name"]
+	if v != nil {
+		var name string
+		err = json.Unmarshal(*m["name"], &name)
+		if err != nil {
+			return err
+		}
+		ca.Name = &name
+	}
+
+	v = m["type"]
+	if v != nil {
+		var typeVar string
+		err = json.Unmarshal(*m["type"], &typeVar)
+		if err != nil {
+			return err
+		}
+		ca.Type = &typeVar
+	}
+
+	v = m["properties"]
+	if v != nil {
+		var properties ClassicAdministratorProperties
+		err = json.Unmarshal(*m["properties"], &properties)
+		if err != nil {
+			return err
+		}
+		ca.ClassicAdministratorProperties = &properties
+	}
+
+	return nil
+}
+
+// ClassicAdministratorListResult classicAdministrator list result information.
 type ClassicAdministratorListResult struct {
-	rawResponse *http.Response
+	autorest.Response `json:"-"`
 	// Value - An array of administrators.
-	Value []ClassicAdministrator `json:"value,omitempty"`
+	Value *[]ClassicAdministrator `json:"value,omitempty"`
 	// NextLink - The URL to use for getting the next set of results.
-	NextLink Marker `json:"NextLink"`
+	NextLink *string `json:"nextLink,omitempty"`
 }
 
-// Response returns the raw HTTP response object.
-func (calr ClassicAdministratorListResult) Response() *http.Response {
-	return calr.rawResponse
+// ClassicAdministratorListResultIterator provides access to a complete listing of ClassicAdministrator values.
+type ClassicAdministratorListResultIterator struct {
+	i    int
+	page ClassicAdministratorListResultPage
 }
 
-// StatusCode returns the HTTP status code of the response, e.g. 200.
-func (calr ClassicAdministratorListResult) StatusCode() int {
-	return calr.rawResponse.StatusCode
+// Next advances to the next value.  If there was an error making
+// the request the iterator does not advance and the error is returned.
+func (iter *ClassicAdministratorListResultIterator) Next() error {
+	iter.i++
+	if iter.i < len(iter.page.Values()) {
+		return nil
+	}
+	err := iter.page.Next()
+	if err != nil {
+		iter.i--
+		return err
+	}
+	iter.i = 0
+	return nil
 }
 
-// Status returns the HTTP status message of the response, e.g. "200 OK".
-func (calr ClassicAdministratorListResult) Status() string {
-	return calr.rawResponse.Status
+// NotDone returns true if the enumeration should be started or is not yet complete.
+func (iter ClassicAdministratorListResultIterator) NotDone() bool {
+	return iter.page.NotDone() && iter.i < len(iter.page.Values())
 }
 
-// ClassicAdministratorProperties - Classic Administrator properties.
+// Response returns the raw server response from the last page request.
+func (iter ClassicAdministratorListResultIterator) Response() ClassicAdministratorListResult {
+	return iter.page.Response()
+}
+
+// Value returns the current value or a zero-initialized value if the
+// iterator has advanced beyond the end of the collection.
+func (iter ClassicAdministratorListResultIterator) Value() ClassicAdministrator {
+	if !iter.page.NotDone() {
+		return ClassicAdministrator{}
+	}
+	return iter.page.Values()[iter.i]
+}
+
+// IsEmpty returns true if the ListResult contains no values.
+func (calr ClassicAdministratorListResult) IsEmpty() bool {
+	return calr.Value == nil || len(*calr.Value) == 0
+}
+
+// classicAdministratorListResultPreparer prepares a request to retrieve the next set of results.
+// It returns nil if no more results exist.
+func (calr ClassicAdministratorListResult) classicAdministratorListResultPreparer() (*http.Request, error) {
+	if calr.NextLink == nil || len(to.String(calr.NextLink)) < 1 {
+		return nil, nil
+	}
+	return autorest.Prepare(&http.Request{},
+		autorest.AsJSON(),
+		autorest.AsGet(),
+		autorest.WithBaseURL(to.String(calr.NextLink)))
+}
+
+// ClassicAdministratorListResultPage contains a page of ClassicAdministrator values.
+type ClassicAdministratorListResultPage struct {
+	fn   func(ClassicAdministratorListResult) (ClassicAdministratorListResult, error)
+	calr ClassicAdministratorListResult
+}
+
+// Next advances to the next page of values.  If there was an error making
+// the request the page does not advance and the error is returned.
+func (page *ClassicAdministratorListResultPage) Next() error {
+	next, err := page.fn(page.calr)
+	if err != nil {
+		return err
+	}
+	page.calr = next
+	return nil
+}
+
+// NotDone returns true if the page enumeration should be started or is not yet complete.
+func (page ClassicAdministratorListResultPage) NotDone() bool {
+	return !page.calr.IsEmpty()
+}
+
+// Response returns the raw server response from the last page request.
+func (page ClassicAdministratorListResultPage) Response() ClassicAdministratorListResult {
+	return page.calr
+}
+
+// Values returns the slice of values for the current page or nil if there are no values.
+func (page ClassicAdministratorListResultPage) Values() []ClassicAdministrator {
+	if page.calr.IsEmpty() {
+		return nil
+	}
+	return *page.calr.Value
+}
+
+// ClassicAdministratorProperties classic Administrator properties.
 type ClassicAdministratorProperties struct {
 	// EmailAddress - The email address of the administrator.
 	EmailAddress *string `json:"emailAddress,omitempty"`
@@ -86,39 +198,117 @@ type ClassicAdministratorProperties struct {
 	Role *string `json:"role,omitempty"`
 }
 
-// Permission - Role definition permissions.
+// Permission role definition permissions.
 type Permission struct {
 	// Actions - Allowed actions.
-	Actions []string `json:"actions,omitempty"`
+	Actions *[]string `json:"actions,omitempty"`
 	// NotActions - Denied actions.
-	NotActions []string `json:"notActions,omitempty"`
+	NotActions *[]string `json:"notActions,omitempty"`
 }
 
-// PermissionGetResult - Permissions information.
+// PermissionGetResult permissions information.
 type PermissionGetResult struct {
-	rawResponse *http.Response
+	autorest.Response `json:"-"`
 	// Value - An array of permissions.
-	Value []Permission `json:"value,omitempty"`
+	Value *[]Permission `json:"value,omitempty"`
 	// NextLink - The URL to use for getting the next set of results.
-	NextLink Marker `json:"NextLink"`
+	NextLink *string `json:"nextLink,omitempty"`
 }
 
-// Response returns the raw HTTP response object.
-func (pgr PermissionGetResult) Response() *http.Response {
-	return pgr.rawResponse
+// PermissionGetResultIterator provides access to a complete listing of Permission values.
+type PermissionGetResultIterator struct {
+	i    int
+	page PermissionGetResultPage
 }
 
-// StatusCode returns the HTTP status code of the response, e.g. 200.
-func (pgr PermissionGetResult) StatusCode() int {
-	return pgr.rawResponse.StatusCode
+// Next advances to the next value.  If there was an error making
+// the request the iterator does not advance and the error is returned.
+func (iter *PermissionGetResultIterator) Next() error {
+	iter.i++
+	if iter.i < len(iter.page.Values()) {
+		return nil
+	}
+	err := iter.page.Next()
+	if err != nil {
+		iter.i--
+		return err
+	}
+	iter.i = 0
+	return nil
 }
 
-// Status returns the HTTP status message of the response, e.g. "200 OK".
-func (pgr PermissionGetResult) Status() string {
-	return pgr.rawResponse.Status
+// NotDone returns true if the enumeration should be started or is not yet complete.
+func (iter PermissionGetResultIterator) NotDone() bool {
+	return iter.page.NotDone() && iter.i < len(iter.page.Values())
 }
 
-// ProviderOperation - Operation
+// Response returns the raw server response from the last page request.
+func (iter PermissionGetResultIterator) Response() PermissionGetResult {
+	return iter.page.Response()
+}
+
+// Value returns the current value or a zero-initialized value if the
+// iterator has advanced beyond the end of the collection.
+func (iter PermissionGetResultIterator) Value() Permission {
+	if !iter.page.NotDone() {
+		return Permission{}
+	}
+	return iter.page.Values()[iter.i]
+}
+
+// IsEmpty returns true if the ListResult contains no values.
+func (pgr PermissionGetResult) IsEmpty() bool {
+	return pgr.Value == nil || len(*pgr.Value) == 0
+}
+
+// permissionGetResultPreparer prepares a request to retrieve the next set of results.
+// It returns nil if no more results exist.
+func (pgr PermissionGetResult) permissionGetResultPreparer() (*http.Request, error) {
+	if pgr.NextLink == nil || len(to.String(pgr.NextLink)) < 1 {
+		return nil, nil
+	}
+	return autorest.Prepare(&http.Request{},
+		autorest.AsJSON(),
+		autorest.AsGet(),
+		autorest.WithBaseURL(to.String(pgr.NextLink)))
+}
+
+// PermissionGetResultPage contains a page of Permission values.
+type PermissionGetResultPage struct {
+	fn  func(PermissionGetResult) (PermissionGetResult, error)
+	pgr PermissionGetResult
+}
+
+// Next advances to the next page of values.  If there was an error making
+// the request the page does not advance and the error is returned.
+func (page *PermissionGetResultPage) Next() error {
+	next, err := page.fn(page.pgr)
+	if err != nil {
+		return err
+	}
+	page.pgr = next
+	return nil
+}
+
+// NotDone returns true if the page enumeration should be started or is not yet complete.
+func (page PermissionGetResultPage) NotDone() bool {
+	return !page.pgr.IsEmpty()
+}
+
+// Response returns the raw server response from the last page request.
+func (page PermissionGetResultPage) Response() PermissionGetResult {
+	return page.pgr
+}
+
+// Values returns the slice of values for the current page or nil if there are no values.
+func (page PermissionGetResultPage) Values() []Permission {
+	if page.pgr.IsEmpty() {
+		return nil
+	}
+	return *page.pgr.Value
+}
+
+// ProviderOperation operation
 type ProviderOperation struct {
 	// Name - The operation name.
 	Name *string `json:"name,omitempty"`
@@ -129,12 +319,12 @@ type ProviderOperation struct {
 	// Origin - The operation origin.
 	Origin *string `json:"origin,omitempty"`
 	// Properties - The operation properties.
-	Properties map[string]interface{} `json:"properties,omitempty"`
+	Properties *map[string]interface{} `json:"properties,omitempty"`
 }
 
-// ProviderOperationsMetadata - Provider Operations metadata
+// ProviderOperationsMetadata provider Operations metadata
 type ProviderOperationsMetadata struct {
-	rawResponse *http.Response
+	autorest.Response `json:"-"`
 	// ID - The provider id.
 	ID *string `json:"id,omitempty"`
 	// Name - The provider name.
@@ -144,95 +334,218 @@ type ProviderOperationsMetadata struct {
 	// DisplayName - The provider display name.
 	DisplayName *string `json:"displayName,omitempty"`
 	// ResourceTypes - The provider resource types
-	ResourceTypes []ResourceType `json:"resourceTypes,omitempty"`
+	ResourceTypes *[]ResourceType `json:"resourceTypes,omitempty"`
 	// Operations - The provider operations.
-	Operations []ProviderOperation `json:"operations,omitempty"`
+	Operations *[]ProviderOperation `json:"operations,omitempty"`
 }
 
-// Response returns the raw HTTP response object.
-func (pom ProviderOperationsMetadata) Response() *http.Response {
-	return pom.rawResponse
-}
-
-// StatusCode returns the HTTP status code of the response, e.g. 200.
-func (pom ProviderOperationsMetadata) StatusCode() int {
-	return pom.rawResponse.StatusCode
-}
-
-// Status returns the HTTP status message of the response, e.g. "200 OK".
-func (pom ProviderOperationsMetadata) Status() string {
-	return pom.rawResponse.Status
-}
-
-// ProviderOperationsMetadataListResult - Provider operations metadata list
+// ProviderOperationsMetadataListResult provider operations metadata list
 type ProviderOperationsMetadataListResult struct {
-	rawResponse *http.Response
+	autorest.Response `json:"-"`
 	// Value - The list of providers.
-	Value []ProviderOperationsMetadata `json:"value,omitempty"`
+	Value *[]ProviderOperationsMetadata `json:"value,omitempty"`
 	// NextLink - The URL to use for getting the next set of results.
-	NextLink Marker `json:"NextLink"`
+	NextLink *string `json:"nextLink,omitempty"`
 }
 
-// Response returns the raw HTTP response object.
-func (pomlr ProviderOperationsMetadataListResult) Response() *http.Response {
-	return pomlr.rawResponse
+// ProviderOperationsMetadataListResultIterator provides access to a complete listing of ProviderOperationsMetadata
+// values.
+type ProviderOperationsMetadataListResultIterator struct {
+	i    int
+	page ProviderOperationsMetadataListResultPage
 }
 
-// StatusCode returns the HTTP status code of the response, e.g. 200.
-func (pomlr ProviderOperationsMetadataListResult) StatusCode() int {
-	return pomlr.rawResponse.StatusCode
+// Next advances to the next value.  If there was an error making
+// the request the iterator does not advance and the error is returned.
+func (iter *ProviderOperationsMetadataListResultIterator) Next() error {
+	iter.i++
+	if iter.i < len(iter.page.Values()) {
+		return nil
+	}
+	err := iter.page.Next()
+	if err != nil {
+		iter.i--
+		return err
+	}
+	iter.i = 0
+	return nil
 }
 
-// Status returns the HTTP status message of the response, e.g. "200 OK".
-func (pomlr ProviderOperationsMetadataListResult) Status() string {
-	return pomlr.rawResponse.Status
+// NotDone returns true if the enumeration should be started or is not yet complete.
+func (iter ProviderOperationsMetadataListResultIterator) NotDone() bool {
+	return iter.page.NotDone() && iter.i < len(iter.page.Values())
 }
 
-// ResourceType - Resource Type
+// Response returns the raw server response from the last page request.
+func (iter ProviderOperationsMetadataListResultIterator) Response() ProviderOperationsMetadataListResult {
+	return iter.page.Response()
+}
+
+// Value returns the current value or a zero-initialized value if the
+// iterator has advanced beyond the end of the collection.
+func (iter ProviderOperationsMetadataListResultIterator) Value() ProviderOperationsMetadata {
+	if !iter.page.NotDone() {
+		return ProviderOperationsMetadata{}
+	}
+	return iter.page.Values()[iter.i]
+}
+
+// IsEmpty returns true if the ListResult contains no values.
+func (pomlr ProviderOperationsMetadataListResult) IsEmpty() bool {
+	return pomlr.Value == nil || len(*pomlr.Value) == 0
+}
+
+// providerOperationsMetadataListResultPreparer prepares a request to retrieve the next set of results.
+// It returns nil if no more results exist.
+func (pomlr ProviderOperationsMetadataListResult) providerOperationsMetadataListResultPreparer() (*http.Request, error) {
+	if pomlr.NextLink == nil || len(to.String(pomlr.NextLink)) < 1 {
+		return nil, nil
+	}
+	return autorest.Prepare(&http.Request{},
+		autorest.AsJSON(),
+		autorest.AsGet(),
+		autorest.WithBaseURL(to.String(pomlr.NextLink)))
+}
+
+// ProviderOperationsMetadataListResultPage contains a page of ProviderOperationsMetadata values.
+type ProviderOperationsMetadataListResultPage struct {
+	fn    func(ProviderOperationsMetadataListResult) (ProviderOperationsMetadataListResult, error)
+	pomlr ProviderOperationsMetadataListResult
+}
+
+// Next advances to the next page of values.  If there was an error making
+// the request the page does not advance and the error is returned.
+func (page *ProviderOperationsMetadataListResultPage) Next() error {
+	next, err := page.fn(page.pomlr)
+	if err != nil {
+		return err
+	}
+	page.pomlr = next
+	return nil
+}
+
+// NotDone returns true if the page enumeration should be started or is not yet complete.
+func (page ProviderOperationsMetadataListResultPage) NotDone() bool {
+	return !page.pomlr.IsEmpty()
+}
+
+// Response returns the raw server response from the last page request.
+func (page ProviderOperationsMetadataListResultPage) Response() ProviderOperationsMetadataListResult {
+	return page.pomlr
+}
+
+// Values returns the slice of values for the current page or nil if there are no values.
+func (page ProviderOperationsMetadataListResultPage) Values() []ProviderOperationsMetadata {
+	if page.pomlr.IsEmpty() {
+		return nil
+	}
+	return *page.pomlr.Value
+}
+
+// ResourceType resource Type
 type ResourceType struct {
 	// Name - The resource type name.
 	Name *string `json:"name,omitempty"`
 	// DisplayName - The resource type display name.
 	DisplayName *string `json:"displayName,omitempty"`
 	// Operations - The resource type operations.
-	Operations []ProviderOperation `json:"operations,omitempty"`
+	Operations *[]ProviderOperation `json:"operations,omitempty"`
 }
 
-// RoleAssignment - Role Assignments
+// RoleAssignment role Assignments
 type RoleAssignment struct {
-	rawResponse *http.Response
+	autorest.Response `json:"-"`
 	// ID - The role assignment ID.
 	ID *string `json:"id,omitempty"`
 	// Name - The role assignment name.
 	Name *string `json:"name,omitempty"`
 	// Type - The role assignment type.
 	Type *string `json:"type,omitempty"`
-	// Properties - Role assignment properties.
+	// RoleAssignmentPropertiesWithScope - Role assignment properties.
 	*RoleAssignmentPropertiesWithScope `json:"properties,omitempty"`
 }
 
-// Response returns the raw HTTP response object.
-func (ra RoleAssignment) Response() *http.Response {
-	return ra.rawResponse
+// UnmarshalJSON is the custom unmarshaler for RoleAssignment struct.
+func (ra *RoleAssignment) UnmarshalJSON(body []byte) error {
+	var m map[string]*json.RawMessage
+	err := json.Unmarshal(body, &m)
+	if err != nil {
+		return err
+	}
+	var v *json.RawMessage
+
+	v = m["id"]
+	if v != nil {
+		var ID string
+		err = json.Unmarshal(*m["id"], &ID)
+		if err != nil {
+			return err
+		}
+		ra.ID = &ID
+	}
+
+	v = m["name"]
+	if v != nil {
+		var name string
+		err = json.Unmarshal(*m["name"], &name)
+		if err != nil {
+			return err
+		}
+		ra.Name = &name
+	}
+
+	v = m["type"]
+	if v != nil {
+		var typeVar string
+		err = json.Unmarshal(*m["type"], &typeVar)
+		if err != nil {
+			return err
+		}
+		ra.Type = &typeVar
+	}
+
+	v = m["properties"]
+	if v != nil {
+		var properties RoleAssignmentPropertiesWithScope
+		err = json.Unmarshal(*m["properties"], &properties)
+		if err != nil {
+			return err
+		}
+		ra.RoleAssignmentPropertiesWithScope = &properties
+	}
+
+	return nil
 }
 
-// StatusCode returns the HTTP status code of the response, e.g. 200.
-func (ra RoleAssignment) StatusCode() int {
-	return ra.rawResponse.StatusCode
-}
-
-// Status returns the HTTP status message of the response, e.g. "200 OK".
-func (ra RoleAssignment) Status() string {
-	return ra.rawResponse.Status
-}
-
-// RoleAssignmentCreateParameters - Role assignment create parameters.
+// RoleAssignmentCreateParameters role assignment create parameters.
 type RoleAssignmentCreateParameters struct {
-	// Properties - Role assignment properties.
+	// RoleAssignmentProperties - Role assignment properties.
 	*RoleAssignmentProperties `json:"properties,omitempty"`
 }
 
-// RoleAssignmentFilter - Role Assignments filter
+// UnmarshalJSON is the custom unmarshaler for RoleAssignmentCreateParameters struct.
+func (racp *RoleAssignmentCreateParameters) UnmarshalJSON(body []byte) error {
+	var m map[string]*json.RawMessage
+	err := json.Unmarshal(body, &m)
+	if err != nil {
+		return err
+	}
+	var v *json.RawMessage
+
+	v = m["properties"]
+	if v != nil {
+		var properties RoleAssignmentProperties
+		err = json.Unmarshal(*m["properties"], &properties)
+		if err != nil {
+			return err
+		}
+		racp.RoleAssignmentProperties = &properties
+	}
+
+	return nil
+}
+
+// RoleAssignmentFilter role Assignments filter
 type RoleAssignmentFilter struct {
 	// PrincipalID - Returns role assignment of the specific principal.
 	PrincipalID *string `json:"principalId,omitempty"`
@@ -240,31 +553,109 @@ type RoleAssignmentFilter struct {
 	CanDelegate *bool `json:"canDelegate,omitempty"`
 }
 
-// RoleAssignmentListResult - Role assignment list operation result.
+// RoleAssignmentListResult role assignment list operation result.
 type RoleAssignmentListResult struct {
-	rawResponse *http.Response
+	autorest.Response `json:"-"`
 	// Value - Role assignment list.
-	Value []RoleAssignment `json:"value,omitempty"`
+	Value *[]RoleAssignment `json:"value,omitempty"`
 	// NextLink - The URL to use for getting the next set of results.
-	NextLink Marker `json:"NextLink"`
+	NextLink *string `json:"nextLink,omitempty"`
 }
 
-// Response returns the raw HTTP response object.
-func (ralr RoleAssignmentListResult) Response() *http.Response {
-	return ralr.rawResponse
+// RoleAssignmentListResultIterator provides access to a complete listing of RoleAssignment values.
+type RoleAssignmentListResultIterator struct {
+	i    int
+	page RoleAssignmentListResultPage
 }
 
-// StatusCode returns the HTTP status code of the response, e.g. 200.
-func (ralr RoleAssignmentListResult) StatusCode() int {
-	return ralr.rawResponse.StatusCode
+// Next advances to the next value.  If there was an error making
+// the request the iterator does not advance and the error is returned.
+func (iter *RoleAssignmentListResultIterator) Next() error {
+	iter.i++
+	if iter.i < len(iter.page.Values()) {
+		return nil
+	}
+	err := iter.page.Next()
+	if err != nil {
+		iter.i--
+		return err
+	}
+	iter.i = 0
+	return nil
 }
 
-// Status returns the HTTP status message of the response, e.g. "200 OK".
-func (ralr RoleAssignmentListResult) Status() string {
-	return ralr.rawResponse.Status
+// NotDone returns true if the enumeration should be started or is not yet complete.
+func (iter RoleAssignmentListResultIterator) NotDone() bool {
+	return iter.page.NotDone() && iter.i < len(iter.page.Values())
 }
 
-// RoleAssignmentProperties - Role assignment properties.
+// Response returns the raw server response from the last page request.
+func (iter RoleAssignmentListResultIterator) Response() RoleAssignmentListResult {
+	return iter.page.Response()
+}
+
+// Value returns the current value or a zero-initialized value if the
+// iterator has advanced beyond the end of the collection.
+func (iter RoleAssignmentListResultIterator) Value() RoleAssignment {
+	if !iter.page.NotDone() {
+		return RoleAssignment{}
+	}
+	return iter.page.Values()[iter.i]
+}
+
+// IsEmpty returns true if the ListResult contains no values.
+func (ralr RoleAssignmentListResult) IsEmpty() bool {
+	return ralr.Value == nil || len(*ralr.Value) == 0
+}
+
+// roleAssignmentListResultPreparer prepares a request to retrieve the next set of results.
+// It returns nil if no more results exist.
+func (ralr RoleAssignmentListResult) roleAssignmentListResultPreparer() (*http.Request, error) {
+	if ralr.NextLink == nil || len(to.String(ralr.NextLink)) < 1 {
+		return nil, nil
+	}
+	return autorest.Prepare(&http.Request{},
+		autorest.AsJSON(),
+		autorest.AsGet(),
+		autorest.WithBaseURL(to.String(ralr.NextLink)))
+}
+
+// RoleAssignmentListResultPage contains a page of RoleAssignment values.
+type RoleAssignmentListResultPage struct {
+	fn   func(RoleAssignmentListResult) (RoleAssignmentListResult, error)
+	ralr RoleAssignmentListResult
+}
+
+// Next advances to the next page of values.  If there was an error making
+// the request the page does not advance and the error is returned.
+func (page *RoleAssignmentListResultPage) Next() error {
+	next, err := page.fn(page.ralr)
+	if err != nil {
+		return err
+	}
+	page.ralr = next
+	return nil
+}
+
+// NotDone returns true if the page enumeration should be started or is not yet complete.
+func (page RoleAssignmentListResultPage) NotDone() bool {
+	return !page.ralr.IsEmpty()
+}
+
+// Response returns the raw server response from the last page request.
+func (page RoleAssignmentListResultPage) Response() RoleAssignmentListResult {
+	return page.ralr
+}
+
+// Values returns the slice of values for the current page or nil if there are no values.
+func (page RoleAssignmentListResultPage) Values() []RoleAssignment {
+	if page.ralr.IsEmpty() {
+		return nil
+	}
+	return *page.ralr.Value
+}
+
+// RoleAssignmentProperties role assignment properties.
 type RoleAssignmentProperties struct {
 	// RoleDefinitionID - The role definition ID used in the role assignment.
 	RoleDefinitionID *string `json:"roleDefinitionId,omitempty"`
@@ -274,7 +665,7 @@ type RoleAssignmentProperties struct {
 	CanDelegate *bool `json:"canDelegate,omitempty"`
 }
 
-// RoleAssignmentPropertiesWithScope - Role assignment properties with scope.
+// RoleAssignmentPropertiesWithScope role assignment properties with scope.
 type RoleAssignmentPropertiesWithScope struct {
 	// Scope - The role assignment scope.
 	Scope *string `json:"scope,omitempty"`
@@ -286,65 +677,180 @@ type RoleAssignmentPropertiesWithScope struct {
 	CanDelegate *bool `json:"canDelegate,omitempty"`
 }
 
-// RoleDefinition - Role definition.
+// RoleDefinition role definition.
 type RoleDefinition struct {
-	rawResponse *http.Response
+	autorest.Response `json:"-"`
 	// ID - The role definition ID.
 	ID *string `json:"id,omitempty"`
 	// Name - The role definition name.
 	Name *string `json:"name,omitempty"`
 	// Type - The role definition type.
 	Type *string `json:"type,omitempty"`
-	// Properties - Role definition properties.
+	// RoleDefinitionProperties - Role definition properties.
 	*RoleDefinitionProperties `json:"properties,omitempty"`
 }
 
-// Response returns the raw HTTP response object.
-func (rd RoleDefinition) Response() *http.Response {
-	return rd.rawResponse
+// UnmarshalJSON is the custom unmarshaler for RoleDefinition struct.
+func (rd *RoleDefinition) UnmarshalJSON(body []byte) error {
+	var m map[string]*json.RawMessage
+	err := json.Unmarshal(body, &m)
+	if err != nil {
+		return err
+	}
+	var v *json.RawMessage
+
+	v = m["id"]
+	if v != nil {
+		var ID string
+		err = json.Unmarshal(*m["id"], &ID)
+		if err != nil {
+			return err
+		}
+		rd.ID = &ID
+	}
+
+	v = m["name"]
+	if v != nil {
+		var name string
+		err = json.Unmarshal(*m["name"], &name)
+		if err != nil {
+			return err
+		}
+		rd.Name = &name
+	}
+
+	v = m["type"]
+	if v != nil {
+		var typeVar string
+		err = json.Unmarshal(*m["type"], &typeVar)
+		if err != nil {
+			return err
+		}
+		rd.Type = &typeVar
+	}
+
+	v = m["properties"]
+	if v != nil {
+		var properties RoleDefinitionProperties
+		err = json.Unmarshal(*m["properties"], &properties)
+		if err != nil {
+			return err
+		}
+		rd.RoleDefinitionProperties = &properties
+	}
+
+	return nil
 }
 
-// StatusCode returns the HTTP status code of the response, e.g. 200.
-func (rd RoleDefinition) StatusCode() int {
-	return rd.rawResponse.StatusCode
-}
-
-// Status returns the HTTP status message of the response, e.g. "200 OK".
-func (rd RoleDefinition) Status() string {
-	return rd.rawResponse.Status
-}
-
-// RoleDefinitionFilter - Role Definitions filter
+// RoleDefinitionFilter role Definitions filter
 type RoleDefinitionFilter struct {
 	// RoleName - Returns role definition with the specific name.
 	RoleName *string `json:"roleName,omitempty"`
 }
 
-// RoleDefinitionListResult - Role definition list operation result.
+// RoleDefinitionListResult role definition list operation result.
 type RoleDefinitionListResult struct {
-	rawResponse *http.Response
+	autorest.Response `json:"-"`
 	// Value - Role definition list.
-	Value []RoleDefinition `json:"value,omitempty"`
+	Value *[]RoleDefinition `json:"value,omitempty"`
 	// NextLink - The URL to use for getting the next set of results.
-	NextLink Marker `json:"NextLink"`
+	NextLink *string `json:"nextLink,omitempty"`
 }
 
-// Response returns the raw HTTP response object.
-func (rdlr RoleDefinitionListResult) Response() *http.Response {
-	return rdlr.rawResponse
+// RoleDefinitionListResultIterator provides access to a complete listing of RoleDefinition values.
+type RoleDefinitionListResultIterator struct {
+	i    int
+	page RoleDefinitionListResultPage
 }
 
-// StatusCode returns the HTTP status code of the response, e.g. 200.
-func (rdlr RoleDefinitionListResult) StatusCode() int {
-	return rdlr.rawResponse.StatusCode
+// Next advances to the next value.  If there was an error making
+// the request the iterator does not advance and the error is returned.
+func (iter *RoleDefinitionListResultIterator) Next() error {
+	iter.i++
+	if iter.i < len(iter.page.Values()) {
+		return nil
+	}
+	err := iter.page.Next()
+	if err != nil {
+		iter.i--
+		return err
+	}
+	iter.i = 0
+	return nil
 }
 
-// Status returns the HTTP status message of the response, e.g. "200 OK".
-func (rdlr RoleDefinitionListResult) Status() string {
-	return rdlr.rawResponse.Status
+// NotDone returns true if the enumeration should be started or is not yet complete.
+func (iter RoleDefinitionListResultIterator) NotDone() bool {
+	return iter.page.NotDone() && iter.i < len(iter.page.Values())
 }
 
-// RoleDefinitionProperties - Role definition properties.
+// Response returns the raw server response from the last page request.
+func (iter RoleDefinitionListResultIterator) Response() RoleDefinitionListResult {
+	return iter.page.Response()
+}
+
+// Value returns the current value or a zero-initialized value if the
+// iterator has advanced beyond the end of the collection.
+func (iter RoleDefinitionListResultIterator) Value() RoleDefinition {
+	if !iter.page.NotDone() {
+		return RoleDefinition{}
+	}
+	return iter.page.Values()[iter.i]
+}
+
+// IsEmpty returns true if the ListResult contains no values.
+func (rdlr RoleDefinitionListResult) IsEmpty() bool {
+	return rdlr.Value == nil || len(*rdlr.Value) == 0
+}
+
+// roleDefinitionListResultPreparer prepares a request to retrieve the next set of results.
+// It returns nil if no more results exist.
+func (rdlr RoleDefinitionListResult) roleDefinitionListResultPreparer() (*http.Request, error) {
+	if rdlr.NextLink == nil || len(to.String(rdlr.NextLink)) < 1 {
+		return nil, nil
+	}
+	return autorest.Prepare(&http.Request{},
+		autorest.AsJSON(),
+		autorest.AsGet(),
+		autorest.WithBaseURL(to.String(rdlr.NextLink)))
+}
+
+// RoleDefinitionListResultPage contains a page of RoleDefinition values.
+type RoleDefinitionListResultPage struct {
+	fn   func(RoleDefinitionListResult) (RoleDefinitionListResult, error)
+	rdlr RoleDefinitionListResult
+}
+
+// Next advances to the next page of values.  If there was an error making
+// the request the page does not advance and the error is returned.
+func (page *RoleDefinitionListResultPage) Next() error {
+	next, err := page.fn(page.rdlr)
+	if err != nil {
+		return err
+	}
+	page.rdlr = next
+	return nil
+}
+
+// NotDone returns true if the page enumeration should be started or is not yet complete.
+func (page RoleDefinitionListResultPage) NotDone() bool {
+	return !page.rdlr.IsEmpty()
+}
+
+// Response returns the raw server response from the last page request.
+func (page RoleDefinitionListResultPage) Response() RoleDefinitionListResult {
+	return page.rdlr
+}
+
+// Values returns the slice of values for the current page or nil if there are no values.
+func (page RoleDefinitionListResultPage) Values() []RoleDefinition {
+	if page.rdlr.IsEmpty() {
+		return nil
+	}
+	return *page.rdlr.Value
+}
+
+// RoleDefinitionProperties role definition properties.
 type RoleDefinitionProperties struct {
 	// RoleName - The role name.
 	RoleName *string `json:"roleName,omitempty"`
@@ -353,7 +859,7 @@ type RoleDefinitionProperties struct {
 	// RoleType - The role type.
 	RoleType *string `json:"type,omitempty"`
 	// Permissions - Role definition permissions.
-	Permissions []Permission `json:"permissions,omitempty"`
+	Permissions *[]Permission `json:"permissions,omitempty"`
 	// AssignableScopes - Role definition assignable scopes.
-	AssignableScopes []string `json:"assignableScopes,omitempty"`
+	AssignableScopes *[]string `json:"assignableScopes,omitempty"`
 }
