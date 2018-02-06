@@ -887,6 +887,45 @@ type VaultProperties struct {
 	CreateMode CreateMode `json:"createMode,omitempty"`
 }
 
+// VaultsCreateOrUpdateFuture an abstraction for monitoring and retrieving the results of a long-running operation.
+type VaultsCreateOrUpdateFuture struct {
+	azure.Future
+	req *http.Request
+}
+
+// Result returns the result of the asynchronous operation.
+// If the operation has not completed it will return an error.
+func (future VaultsCreateOrUpdateFuture) Result(client VaultsClient) (vVar Vault, err error) {
+	var done bool
+	done, err = future.Done(client)
+	if err != nil {
+		err = autorest.NewErrorWithError(err, "keyvault.VaultsCreateOrUpdateFuture", "Result", future.Response(), "Polling failure")
+		return
+	}
+	if !done {
+		return vVar, azure.NewAsyncOpIncompleteError("keyvault.VaultsCreateOrUpdateFuture")
+	}
+	if future.PollingMethod() == azure.PollingLocation {
+		vVar, err = client.CreateOrUpdateResponder(future.Response())
+		if err != nil {
+			err = autorest.NewErrorWithError(err, "keyvault.VaultsCreateOrUpdateFuture", "Result", future.Response(), "Failure responding to request")
+		}
+		return
+	}
+	var resp *http.Response
+	resp, err = autorest.SendWithSender(client, autorest.ChangeToGet(future.req),
+		autorest.DoRetryForStatusCodes(client.RetryAttempts, client.RetryDuration, autorest.StatusCodesForRetry...))
+	if err != nil {
+		err = autorest.NewErrorWithError(err, "keyvault.VaultsCreateOrUpdateFuture", "Result", resp, "Failure sending request")
+		return
+	}
+	vVar, err = client.CreateOrUpdateResponder(resp)
+	if err != nil {
+		err = autorest.NewErrorWithError(err, "keyvault.VaultsCreateOrUpdateFuture", "Result", resp, "Failure responding to request")
+	}
+	return
+}
+
 // VaultsPurgeDeletedFuture an abstraction for monitoring and retrieving the results of a long-running operation.
 type VaultsPurgeDeletedFuture struct {
 	azure.Future
@@ -899,21 +938,29 @@ func (future VaultsPurgeDeletedFuture) Result(client VaultsClient) (ar autorest.
 	var done bool
 	done, err = future.Done(client)
 	if err != nil {
+		err = autorest.NewErrorWithError(err, "keyvault.VaultsPurgeDeletedFuture", "Result", future.Response(), "Polling failure")
 		return
 	}
 	if !done {
-		return ar, autorest.NewError("keyvault.VaultsPurgeDeletedFuture", "Result", "asynchronous operation has not completed")
+		return ar, azure.NewAsyncOpIncompleteError("keyvault.VaultsPurgeDeletedFuture")
 	}
 	if future.PollingMethod() == azure.PollingLocation {
 		ar, err = client.PurgeDeletedResponder(future.Response())
+		if err != nil {
+			err = autorest.NewErrorWithError(err, "keyvault.VaultsPurgeDeletedFuture", "Result", future.Response(), "Failure responding to request")
+		}
 		return
 	}
 	var resp *http.Response
 	resp, err = autorest.SendWithSender(client, autorest.ChangeToGet(future.req),
 		autorest.DoRetryForStatusCodes(client.RetryAttempts, client.RetryDuration, autorest.StatusCodesForRetry...))
 	if err != nil {
+		err = autorest.NewErrorWithError(err, "keyvault.VaultsPurgeDeletedFuture", "Result", resp, "Failure sending request")
 		return
 	}
 	ar, err = client.PurgeDeletedResponder(resp)
+	if err != nil {
+		err = autorest.NewErrorWithError(err, "keyvault.VaultsPurgeDeletedFuture", "Result", resp, "Failure responding to request")
+	}
 	return
 }
